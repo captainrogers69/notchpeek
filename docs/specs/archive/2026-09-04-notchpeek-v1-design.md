@@ -1,14 +1,22 @@
-# Torana — MacBook notch app, v1 design
+> **SUPERSEDED 2026-09-04.** This was the v1 design when the target was a three-panel
+> app (shell, music, calendar) on a macOS 26 floor. The target changed to full NotchNest
+> feature parity on a macOS 14 floor, so this document was replaced by the milestone specs
+> in `docs/specs/`. Kept for the reasoning behind the native core — the NSPanel approach,
+> notch geometry and mouse gating carried forward unchanged. Do not plan work from this file.
+
+# NotchPeek — MacBook notch app, v1 design
 
 **Date:** 2026-09-04
-**Status:** draft, awaiting review
+**Status:** draft, awaiting review. §1/§5/§7 amended after [spike 0](2026-09-04-spike-system-nowplaying.md); §4 and §2.4 changes from that spike are **not yet folded in**.
 **Target:** macOS 26+, Apple Silicon. Dev machine: MacBook Air M2 (notched), macOS 26.5.1, Flutter 3.44.4 / Dart 3.12.2.
 
 ---
 
 ## 1. What this is
 
-**Torana** (तोरण) — the ornamental arch spanning the top of an entrance, as at Sanchi. The Sanskrit name for exactly what this app is: a beam across the top of an opening. Verified clear of Mac software and of the eleven notch apps currently shipping.
+**NotchPeek**, shipped by **Capcraft**, bundle id `com.capcraft.notchpeek`. The name describes the interaction rather than the contents — invisible at rest, peek on events, expand on hover — which is what separates it from the ~35 competitors named for what they hold. Naming, studio identity and store-account constraints are settled in [`docs/info/identity.md`](../info/identity.md); this document does not revisit them.
+
+> Earlier drafts of this spec called the app **Torana**. That name was set aside in favour of a plainer one; see the identity document for the reasoning. Any remaining reference to Torana is stale.
 
 A notch companion for MacBook. At rest the notch looks stock. Hover it and a dark panel drops open with widgets: music, calendar, and later a focus timer, an AI scratchpad and a camera mirror. System events (track change, charger plugged in) briefly widen the notch into a small "live activity" pill that then retracts.
 
@@ -21,7 +29,7 @@ Reference design: `docs/design/initial-mockup.png` — the expanded state, five 
 | UI stack | Flutter + Swift platform layer | Keeps the existing scaffold; Flutter's animation control suits the morph. ~35-40% of the app is Swift regardless of stack. |
 | Distribution | Both: Mac App Store build + direct download build | Reach plus capability. Direct is the real product; MAS is a reduced funnel. |
 | v1 panels | Notch shell, music, calendar | Focus timer, AI panel, camera deferred — the shell is the hard part and everything else slots into it. |
-| Music source | Hybrid, runtime-selected | System-wide now-playing where allowed, AppleScript to Spotify/Music as fallback. Panel degrades, never dies. |
+| Music source | Split read/write | **Revised by [spike 0](2026-09-04-spike-system-nowplaying.md).** Reading system-wide now-playing is gated on macOS 26, so reads come from per-app scripting only; transport commands go through `MRMediaRemoteSendCommand`, which does work. Panel degrades, never dies. |
 | Idle behavior | Invisible at rest, hover to expand, peek on events | Zero visual footprint when unused. |
 
 ### Out of scope for v1
@@ -90,10 +98,10 @@ One `MethodChannel` for commands and three `EventChannel`s for streams.
 
 | Channel | Direction | Carries |
 |---|---|---|
-| `macpro/control` (Method) | Dart → Swift | `setInteractiveRect`, `mediaCommand(play/pause/next/prev/seek)`, `openSettingsPane`, `requestPermission`, `getCapabilities` |
-| `macpro/media` (Event) | Swift → Dart | now-playing track, playback state, position ticks |
-| `macpro/calendar` (Event) | Swift → Dart | today's events, auth state changes |
-| `macpro/system` (Event) | Swift → Dart | geometry changes, battery/charging, capability changes |
+| `notchpeek/control` (Method) | Dart → Swift | `setInteractiveRect`, `mediaCommand(play/pause/next/prev/seek)`, `openSettingsPane`, `requestPermission`, `getCapabilities` |
+| `notchpeek/media` (Event) | Swift → Dart | now-playing track, playback state, position ticks |
+| `notchpeek/calendar` (Event) | Swift → Dart | today's events, auth state changes |
+| `notchpeek/system` (Event) | Swift → Dart | geometry changes, battery/charging, capability changes |
 
 **Artwork crosses once per track change, keyed by track id — never on the position tick.** The tick fires roughly twice a second; shipping a JPEG through it would consume the app's entire CPU budget.
 
@@ -174,7 +182,7 @@ Build flavor comes from `--dart-define=FLAVOR=` plus separate Xcode configuratio
 
 | Failure | Response |
 |---|---|
-| System-wide now-playing throws or returns nothing | `MediaBridge` demotes to `AppleScriptSource`, emits a capability change. UI shows a source badge change, never an error. |
+| System-wide now-playing returns nothing | Expected on macOS 26 — the read path is gated and fails **silently**, not with an error. `MediaBridge` treats an empty reply as "unavailable", not as "nothing playing", and reads via `AppleScriptSource`. |
 | AppleScript consent denied | Music panel renders the needs-permission state. Requires `NSAppleEventsUsageDescription`. |
 | EventChannel dies | Dart reconnects with exponential backoff. |
 | Nothing playing | Idle artwork placeholder — the grey note tile in the mockup. |
@@ -199,7 +207,7 @@ Per TDD: tests first on the pure logic — state machine, geometry maths, fallba
 
 ## 7. Build order
 
-0. **Spike** — confirm whether system-wide now-playing is reachable on macOS 26. Timeboxed. Not fatal either way, since the AppleScript fallback is the guaranteed path.
+0. ~~**Spike**~~ — **done, see [spike 0](2026-09-04-spike-system-nowplaying.md).** Reads gated, commands work. Not fatal: scripting is the read path.
 1. **Shell, native** — panel, window level, geometry, passthrough.
 2. **Shell, Dart** — state machine, morph animation, notch shape, tab bar, status row.
 3. **Capability probe + dual flavor plumbing.**
@@ -225,11 +233,11 @@ This market is crowded. Eleven Mac notch apps were found while checking name ava
 | **MediaMate**, **Notchmeister**, **NotchNest**, **Notchy**, **Seam** | Various free and paid, mostly single-purpose. |
 | **TopNotch** | Inverse product — hides the notch rather than using it. |
 
-**Implication for v1.** Building music + calendar + timer + AI + camera reaches parity with Perch and Canopy and beats nothing. Before implementation starts, Torana needs one defensible answer to "why this instead of Alcove". Candidates worth deciding between: superior live-activity handling (Alcove's own differentiator, so a hard fight), a genuinely better-designed expanded panel, or a widget the others lack. **This is an open decision, not a settled one.**
+**Implication for v1.** Building music + calendar + timer + AI + camera reaches parity with Perch and Canopy and beats nothing. Before implementation starts, NotchPeek needs one defensible answer to "why this instead of Alcove". Candidates worth deciding between: superior live-activity handling (Alcove's own differentiator, so a hard fight), a genuinely better-designed expanded panel, or a widget the others lack. **This is an open decision, not a settled one.**
 
 ## 9. Open questions
 
 - **Premium** — what is behind "Explore Premium"? Which panels or features are paid, and what licensing backend (Paddle / LemonSqueezy / Gumroad)?
 - **Rate App** — where does it point for the direct build, which has no App Store listing?
-- **Bundle id** — `com.example.macpro` must become a real reverse-domain id, e.g. `com.<yourdomain>.torana`, before signing.
+- ~~**Bundle id**~~ — settled: `com.capcraft.notchpeek`, already applied to every platform target.
 - **Updates** — Sparkle for the direct build?
