@@ -12,7 +12,7 @@ When a milestone doc and this document disagree, this document is newer.
 | # | Topic | Status |
 |---|---|---|
 | R1 | OS floor | **decided** — macOS 26.0 |
-| R2 | Playbook will revise M1's architecture | **accepted** — M1 §3.4/§5 provisional |
+| R2 | Playbook will revise M1's architecture | **closed** — playbook written, M1 reconciled |
 | R3 | Scope versus a 3-week ship | **decided** — 3 weeks buys M1, not parity |
 | R4 | Memory budget | **decided** — 300 MB |
 | R5 | Monetization | **deferred** — after a working model |
@@ -20,6 +20,7 @@ When a milestone doc and this document disagree, this document is newer.
 | R7 | Release engineering | **open** — blocks any ship date |
 | R8 | `WKWebView` compositing | **open** — gates M4 |
 | R9 | IP boundary | **decided** — parity, then diverge |
+| R10 | `lib/` does not compile | **open** — blocks all Dart work |
 
 ---
 
@@ -41,11 +42,13 @@ When a milestone doc and this document disagree, this document is newer.
 
 ## R2 — The playbook will revise M1's architecture
 
-**Concern:** M1 §3.4 (Swift modules) and §5 (Dart tree) are architecture, written before the playbook that governs architecture exists.
+**Closed.** `../playbook/architecture-playbook.md` is written and is now the authority on structure, state, layering, DI and naming. **When any choice touches architecture, that document is read first** — ahead of the milestone specs, which describe features, not conventions.
 
-**Accepted, not resolved:** the playbook is coming. Until it lands, **treat M1 §3.4 and §5 as provisional** — the module boundaries are a proposal, not a commitment. Everything else in M1 (window behavior, geometry, mouse gating, the media rules from spike 0, exit criteria) is independent of coding conventions and stands.
+What it settled: `hooks_riverpod` locked (no `flutter_bloc`, no `get_it`, no `StateNotifier`), feature-first Clean Architecture in three layers, Riverpod as the DI graph, `NotchLogger` as the only logging path, Dio behind a single `ApiService`, and a Swift-boundary section with no equivalent in either reference playbook.
 
-**Closes when:** the playbook is written and M1 §3.4/§5 are reconciled against it.
+**Reconciled:** M1 §5's flat tree was replaced by the playbook's feature-first layout and now defers to it rather than restating it. M1 §3.4's Swift module names already matched playbook §4.3.
+
+**Left open by it:** §12 of the playbook — the repo does not match the playbook yet. See R10.
 
 ## R3 — Scope versus a 3-week ship
 
@@ -137,3 +140,21 @@ Features are not protectable and the research docs describe behavior only, so th
 3. **No pixel-copying.** Matching a feature is fine; reproducing their exact layout is not. Our own mockup (`design/initial-mockup.png`) already differs.
 
 **Watch for:** the divergence in R9 and the positioning in R6 are the same conversation. Parity is what makes the app credible; what comes after parity is what makes it ours.
+
+## R10 — `lib/` does not compile
+
+**Open, and it blocks every line of Dart work.** `lib/` carries a partial transplant from the Go2Homes project: a Dio `ApiService`, error types, and two interceptors.
+
+**`flutter analyze` reports 105 errors.** Causes, in order of size:
+
+1. `dio`, `hooks_riverpod`, `flutter_hooks` and `equatable` are not in `pubspec.yaml` — only bare `flutter_riverpod` is.
+2. Imports reference `package:gohomes/…`.
+3. `dio_interceptor.dart` imports four files that do not exist here — a local storage service, a routing service, a login screen and a profile notifier.
+4. `log_interceptor.dart` imports an `AppLogger` that does not exist.
+5. `ApiService` reads its `baseUrl` from `ServiceBase`, a class from the other project.
+
+**Two of these are not mechanical fixes.** The auth interceptor implements bearer-token injection and a 401 → clear-session → route-to-login flow. **NotchPeek has no accounts, no tokens and no login screen**, so that logic has no meaning here and is deleted rather than ported. Likewise `log_interceptor.dart` filters GraphQL presigned-URL traffic that does not exist in this app.
+
+The full item list is playbook §12. **Closes when `flutter analyze` reports 0 errors.**
+
+**Sequence:** this is week-1 work in R3, before the shell. A partially-broken `lib/` makes every later analyzer run useless, because real errors hide among the 105.

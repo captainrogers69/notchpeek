@@ -2,7 +2,13 @@
 
 **Target:** full NotchNest feature parity, macOS 26.0+, Flutter with a Swift platform layer. Direct download first, App Store later. **v1 ships free — monetization is out of scope in every milestone doc.**
 
-## Read in this order
+## Read this first
+
+**[`playbook/architecture-playbook.md`](playbook/architecture-playbook.md)** — how we build. Structure, state management, layering, the Swift boundary, DI, logging, naming, quality gate. **Whenever a choice touches architecture, this is the first document to open** — ahead of every spec below, which describe *what* to build, never *how*.
+
+[`playbook/testing-playbook.md`](playbook/testing-playbook.md) is a placeholder: it gets written once the architecture playbook has settled, because what is testable is decided by the seams. [`playbook/reference/`](playbook/reference/) holds the two playbooks from other projects this one was adapted from — provenance only, never authority.
+
+## Then, in this order
 
 | Doc | What it answers |
 |---|---|
@@ -19,7 +25,7 @@
 
 Every milestone ships as a usable app. Each one lists its own exit criteria.
 
-**Near-term target:** M1 shipped in **3 weeks** — see `risks-and-decisions.md` R3 for the week-by-week cut, and R7 for the signing and notarization work that gates it.
+**Near-term target:** M1 shipped in **3 weeks** — see `risks-and-decisions.md` R3 for the week-by-week cut, R7 for the signing and notarization work that gates it, and **R10 for the 105 analyzer errors that block all Dart work**.
 
 ## Conventions
 
@@ -30,6 +36,6 @@ Every milestone ships as a usable app. Each one lists its own exit criteria.
 
 ## Still to come
 
-- **The coding playbook** — architecture and coding practices. Governs *how* we build; these docs govern *what*. Until it lands, M1 §3.4 and §5 are provisional (R2).
+- **The testing playbook** — coverage, fixtures, goldens, the manual matrix. Written after the architecture playbook settles.
 - **Spike 1** — `WKWebView` compositing inside the notch panel. Gates M4's web players (R8). See M4 §2.
 - **Monetization** — deferred until there is a working model, then decided against real usage (R5).

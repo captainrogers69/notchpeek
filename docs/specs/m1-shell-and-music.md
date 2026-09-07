@@ -124,30 +124,31 @@ Consent copy needed in `Info.plist`: `NSAppleEventsUsageDescription`. For the Ap
 
 ## 5. Dart architecture
 
+Structure, layering, state management, DI and naming are governed by **[`../playbook/architecture-playbook.md`](../playbook/architecture-playbook.md)**, not by this document. Read it first. What follows is only which features M1 creates inside that structure.
+
 ```
 lib/
-  main.dart                    bootstrap; wait for geometry before first frame
-  app/
-    notch_app.dart             root widget
-    theme.dart                 colors, radii, motion tokens
-  shell/
-    notch_shell.dart           the morphing container, owns shell state
-    notch_state.dart           collapsed | peek(kind) | expanded
-    notch_shape.dart           CustomClipper — notch silhouette, concave top corners
-    interactive_rect.dart      measures current rect, pushes to Swift
-    tab_bar.dart               tab strip; renders a variable number of tabs
-    status_row.dart            battery, settings, close
-  panels/
-    music/                     MusicPanel, MusicController, NowPlaying model
-  platform/
-    channels.dart              typed wrappers over the channels
-    capabilities.dart          Capability enum, probe result
-    media_source.dart          NowPlaying stream
-    power_source.dart
-  ui/                          shared: scrubber, artwork tile, icon button, marquee text
+  main.dart                       bootstrap; wait for geometry before first frame
+  app/                            notch_app.dart, theme.dart (colors, radii, motion tokens)
+  core/
+    logging/                      NotchLogger
+    platform/                     channels.dart, channel_service.dart, capabilities.dart
+    network/ services/            ApiResponse, ApiErrorHandler, Dio ApiService (artwork only)
+  features/
+    shell/                        the container — state machine, notch shape, morph,
+                                  tab strip, status row, interactive-rect reporting
+      data/ domain/ presentation/
+    music/                        the only panel in M1
+      data/ domain/ presentation/
+  shared/
+    widgets/                      scrubber, artwork tile, icon button, marquee text,
+                                  permission prompt, panel scaffold
+    utils/                        helpers, enums, extensions
 ```
 
-State management: **Riverpod**, no codegen (already in `pubspec.yaml`). The native side is stream-shaped, so a `StreamProvider` per `EventChannel` is a direct fit and keeps panels free of lifecycle code.
+`features/shell/` is the container, not a panel. Panels render inside it and know nothing about it.
+
+Per the playbook: **`hooks_riverpod` only**, `Notifier`/`AsyncNotifier` (never `StateNotifier`), a `StreamProvider` per `EventChannel`, Riverpod as the DI layer with no `get_it`, and no routing package — tab selection is state, settings is a native SwiftUI window.
 
 **The tab strip renders a variable number of tabs from the start.** M4's AI panel is absent below macOS 26, so a fixed tab count would have to be torn out later.
 
