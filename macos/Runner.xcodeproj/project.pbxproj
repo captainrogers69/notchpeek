@@ -30,12 +30,21 @@
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
+		351A6333DCA968CFBB74788D /* CapabilityProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D54B409923CB8FE6504241 /* CapabilityProbe.swift */; };
+		387526E51686D969CE456A3B /* MusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74E5E1FF877D29B739BE638 /* MusicSource.swift */; };
+		4FE14157ABE61C73A92DC013 /* MediaBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A45C8DC426AED4E6CDAB660 /* MediaBridgeTests.swift */; };
+		54D04D4D0DE59DAC43A55EBD /* SpotifySource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C005332AECE103F46D290C8 /* SpotifySource.swift */; };
 		68507A69AC16FEC8E2B0401F /* Channels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477207B8EB420E3797729FF0 /* Channels.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		78B70BD51A860AD8963FBDBE /* ArtworkCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 467BFC0434EA56F3EC28B794 /* ArtworkCache.swift */; };
 		A0E799D95C74AC456A8892BB /* MouseGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */; };
 		A5F74F134CCC1308546D7FE4 /* NotchGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C336DF128690150EA8148009 /* NotchGeometryTests.swift */; };
+		B0D925EED2C8238BE180353B /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596C3C3A8213780AB7395E3F /* AppleMusicSource.swift */; };
 		B51C7F594BF1A9F972EFAB73 /* MouseGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98635FE554959524A5BD57A4 /* MouseGateTests.swift */; };
+		CFF342D1826A1339B8C97545 /* MediaBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F499DA3C4F8969C599C46846 /* MediaBridge.swift */; };
+		D1398704CB215E7A02D066F3 /* MusicSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9C3A5F69613018D53651E6 /* MusicSourceTests.swift */; };
 		E41F052EF71C4E779399B36C /* NotchGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFABD67D3289711677A58FA2 /* NotchGeometry.swift */; };
+		F5B18A540DE1378983054A5C /* ScriptingSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC20B9B40F8CB300D2E1EBA /* ScriptingSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +78,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0C005332AECE103F46D290C8 /* SpotifySource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpotifySource.swift; sourceTree = "<group>"; };
+		2A45C8DC426AED4E6CDAB660 /* MediaBridgeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaBridgeTests.swift; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
@@ -85,17 +96,24 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
+		467BFC0434EA56F3EC28B794 /* ArtworkCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ArtworkCache.swift; sourceTree = "<group>"; };
 		477207B8EB420E3797729FF0 /* Channels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Channels.swift; sourceTree = "<group>"; };
+		4B9C3A5F69613018D53651E6 /* MusicSourceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MusicSourceTests.swift; sourceTree = "<group>"; };
+		596C3C3A8213780AB7395E3F /* AppleMusicSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppleMusicSource.swift; sourceTree = "<group>"; };
+		6AC20B9B40F8CB300D2E1EBA /* ScriptingSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScriptingSource.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MouseGate.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		98635FE554959524A5BD57A4 /* MouseGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MouseGateTests.swift; sourceTree = "<group>"; };
 		AFABD67D3289711677A58FA2 /* NotchGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
+		B74E5E1FF877D29B739BE638 /* MusicSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MusicSource.swift; sourceTree = "<group>"; };
 		C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayBufferTests.swift; sourceTree = "<group>"; };
 		C336DF128690150EA8148009 /* NotchGeometryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometryTests.swift; sourceTree = "<group>"; };
+		D1D54B409923CB8FE6504241 /* CapabilityProbe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapabilityProbe.swift; sourceTree = "<group>"; };
 		D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChannelBridge.swift; sourceTree = "<group>"; };
 		E39100543B7920179BA76C1F /* NotchWindowController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
+		F499DA3C4F8969C599C46846 /* MediaBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +142,8 @@
 				C336DF128690150EA8148009 /* NotchGeometryTests.swift */,
 				98635FE554959524A5BD57A4 /* MouseGateTests.swift */,
 				C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */,
+				4B9C3A5F69613018D53651E6 /* MusicSourceTests.swift */,
+				2A45C8DC426AED4E6CDAB660 /* MediaBridgeTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -211,6 +231,13 @@
 				D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */,
 				E39100543B7920179BA76C1F /* NotchWindowController.swift */,
 				88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */,
+				D1D54B409923CB8FE6504241 /* CapabilityProbe.swift */,
+				B74E5E1FF877D29B739BE638 /* MusicSource.swift */,
+				6AC20B9B40F8CB300D2E1EBA /* ScriptingSource.swift */,
+				0C005332AECE103F46D290C8 /* SpotifySource.swift */,
+				596C3C3A8213780AB7395E3F /* AppleMusicSource.swift */,
+				467BFC0434EA56F3EC28B794 /* ArtworkCache.swift */,
+				F499DA3C4F8969C599C46846 /* MediaBridge.swift */,
 			);
 			name = Notch;
 			path = Notch;
@@ -383,6 +410,8 @@
 				A5F74F134CCC1308546D7FE4 /* NotchGeometryTests.swift in Sources */,
 				B51C7F594BF1A9F972EFAB73 /* MouseGateTests.swift in Sources */,
 				2BA1686F21F8672D0871DA82 /* ReplayBufferTests.swift in Sources */,
+				D1398704CB215E7A02D066F3 /* MusicSourceTests.swift in Sources */,
+				4FE14157ABE61C73A92DC013 /* MediaBridgeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,6 +427,13 @@
 				2EB4D115E6A32EB48E6E4F0E /* ChannelBridge.swift in Sources */,
 				1FA75535ABA7601A92DD25FE /* NotchWindowController.swift in Sources */,
 				A0E799D95C74AC456A8892BB /* MouseGate.swift in Sources */,
+				351A6333DCA968CFBB74788D /* CapabilityProbe.swift in Sources */,
+				387526E51686D969CE456A3B /* MusicSource.swift in Sources */,
+				F5B18A540DE1378983054A5C /* ScriptingSource.swift in Sources */,
+				54D04D4D0DE59DAC43A55EBD /* SpotifySource.swift in Sources */,
+				B0D925EED2C8238BE180353B /* AppleMusicSource.swift in Sources */,
+				78B70BD51A860AD8963FBDBE /* ArtworkCache.swift in Sources */,
+				CFF342D1826A1339B8C97545 /* MediaBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

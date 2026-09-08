@@ -11,8 +11,14 @@ class AppDelegate: FlutterAppDelegate {
     var bridge: ChannelBridge?
     var geometryObserver: NotchGeometryObserver?
     var mouseGate: MouseGate?
+    var mediaBridge: MediaBridge?
 
     private var started = false
+
+    /// The last snapshot pushed to Dart, so an unchanged one is not pushed
+    /// again.
+    private var lastCapabilities: [String: Any]?
+    private var capabilityToken: NSObjectProtocol?
 
     /// An agent app has no windows to close. Quitting is the settings window's
     /// job, not the last window's.
@@ -61,6 +67,40 @@ class AppDelegate: FlutterAppDelegate {
         bridge.start()
         self.bridge = bridge
 
+        bridge.onGetCapabilities = { CapabilityProbe.snapshot() }
+
+        bridge.onRequestPermission = { what in
+            switch what {
+            case "appleMusic":
+                CapabilityProbe.requestAppleEvents(
+                    for: CapabilityProbe.BundleId.appleMusic)
+            case "spotify":
+                CapabilityProbe.requestAppleEvents(
+                    for: CapabilityProbe.BundleId.spotify)
+            default:
+                CapabilityProbe.openAutomationSettings()
+            }
+        }
+
+        bridge.onOpenSettings = { CapabilityProbe.openAutomationSettings() }
+
+        // Permissions change while the user is in System Settings, and this
+        // app is never the one they come back *to*: an agent app whose only
+        // window is a non-activating panel does not become active, so
+        // `didBecomeActiveNotification` would never fire. Watch for any app
+        // activating instead.
+        capabilityToken = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self, weak bridge] _ in
+            self?.pushCapabilities(via: bridge)
+        }
+
+        // Seeds `lastCapabilities` as well as the replay buffer, so Dart has
+        // an answer even if its own `getCapabilities` call fails.
+        pushCapabilities(via: bridge)
+
         let controller = NotchWindowController()
         windowController = controller
 
@@ -102,6 +142,16 @@ class AppDelegate: FlutterAppDelegate {
                 .alignment, performanceTime: .now)
         }
 
+        let media = MediaBridge()
+        media.onUpdate = { [weak bridge] payload in bridge?.sendMedia(payload) }
+        media.start()
+        mediaBridge = media
+
+        bridge.onMediaCommand = { [weak media] payload in media?.command(payload) }
+        bridge.onSetMediaPolling = { [weak media] enabled in
+            media?.setPolling(enabled)
+        }
+
         let observer = NotchGeometryObserver { [weak self, weak bridge] metrics in
             // Reposition before telling Dart: the window must already be in the
             // right place by the time Dart draws for that geometry.
@@ -113,5 +163,18 @@ class AppDelegate: FlutterAppDelegate {
         geometryObserver = observer
 
         controller.show()
+    }
+
+    /// `didActivateApplicationNotification` fires on every app switch, and
+    /// re-sending an identical snapshot would wake the shell for nothing.
+    private func pushCapabilities(via bridge: ChannelBridge?) {
+        let snapshot = CapabilityProbe.snapshot()
+        if let last = lastCapabilities,
+            NSDictionary(dictionary: last).isEqual(to: snapshot)
+        {
+            return
+        }
+        lastCapabilities = snapshot
+        bridge?.sendSystem(SystemEvent.capabilities, snapshot)
     }
 }

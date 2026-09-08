@@ -21,6 +21,11 @@ enum ControlMethod {
     static let requestPermission = "requestPermission"
     static let getCapabilities = "getCapabilities"
     static let haptic = "haptic"
+
+    /// Not in spec §3.5. Added in M1 because §4's "poll at 1 Hz while
+    /// expanded, and not at all while collapsed" needs a signal and none of
+    /// the five carries it. Reconciled into the spec by the docs task.
+    static let setMediaPolling = "setMediaPolling"
 }
 
 /// Every event kind that crosses `NotchChannel.system`.
