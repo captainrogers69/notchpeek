@@ -4,6 +4,7 @@ import 'package:notchpeek/features/music/data/datasources/music_datasource.dart'
 import 'package:notchpeek/features/music/data/repositories/music_repository_impl.dart';
 import 'package:notchpeek/features/music/domain/entities/now_playing.dart';
 import 'package:notchpeek/features/music/domain/repositories/music_repository.dart';
+import 'package:notchpeek/features/music/domain/usecases/open_player.dart';
 import 'package:notchpeek/features/music/domain/usecases/send_media_command.dart';
 import 'package:notchpeek/features/music/domain/usecases/set_media_polling.dart';
 import 'package:notchpeek/features/music/domain/usecases/watch_now_playing.dart';
@@ -27,6 +28,10 @@ final sendMediaCommandProvider = Provider<SendMediaCommand>(
 
 final setMediaPollingProvider = Provider<SetMediaPolling>(
   (ref) => SetMediaPolling(ref.watch(musicRepositoryProvider)),
+);
+
+final openPlayerProvider = Provider<OpenPlayer>(
+  (ref) => OpenPlayer(ref.watch(musicRepositoryProvider)),
 );
 
 /// Watched even while collapsed: track changes arrive as distributed

@@ -8,9 +8,11 @@ import 'package:notchpeek/features/music/domain/repositories/music_repository.da
 import 'package:notchpeek/features/music/presentation/music_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/panel_host.dart';
 import 'package:notchpeek/shared/utils/enums/media_command.dart';
+import 'package:notchpeek/shared/utils/enums/music_source_id.dart';
 
 class _RecordingMusicRepository implements MusicRepository {
   final List<bool> polling = [];
+  final List<MusicSourceId> opened = [];
 
   @override
   Stream<NowPlaying> watch() => const Stream.empty();
@@ -20,6 +22,12 @@ class _RecordingMusicRepository implements MusicRepository {
     MediaCommand cmd, {
     Duration? seekTo,
   }) async => ApiResponse.success(message: 'OK', data: true);
+
+  @override
+  Future<ApiResponse<bool>> openPlayer(MusicSourceId source) async {
+    opened.add(source);
+    return ApiResponse.success(message: 'OK', data: true);
+  }
 
   @override
   Future<ApiResponse<bool>> setPolling(bool enabled) async {

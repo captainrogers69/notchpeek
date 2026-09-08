@@ -97,6 +97,34 @@ final class MediaBridgeTests: XCTestCase {
         XCTAssertEqual(spotify.sent.first?.1, 42)
     }
 
+    /// A running player that cannot be read still takes commands. Requiring a
+    /// readable source is why play did nothing in the "Not Playing" state.
+    func testRoutesACommandToARunningSourceThatCannotBeRead() {
+        let spotify = StubSource(sourceId: "spotify", isRunning: true, state: nil)
+        let bridge = MediaBridge(sources: [spotify])
+
+        let sent = expectation(description: "command reached the source")
+        spotify.onSend = { sent.fulfill() }
+
+        bridge.command(["command": "playPause"])
+        wait(for: [sent], timeout: 2)
+
+        XCTAssertEqual(spotify.sent.first?.0, "playPause")
+    }
+
+    func testDropsACommandWhenNoPlayerIsRunningAtAll() {
+        let spotify = StubSource(sourceId: "spotify", isRunning: false, state: nil)
+        let bridge = MediaBridge(sources: [spotify])
+
+        bridge.command(["command": "playPause"])
+        // Nothing to wait for; give the queue a moment to be sure.
+        let idle = expectation(description: "queue drained")
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) { idle.fulfill() }
+        wait(for: [idle], timeout: 2)
+
+        XCTAssertTrue(spotify.sent.isEmpty)
+    }
+
     func testAnUnknownCommandIsIgnoredRatherThanCrashing() {
         let spotify = StubSource(sourceId: "spotify", isRunning: true, state: "playing")
         let bridge = MediaBridge(sources: [spotify])
@@ -151,7 +179,26 @@ final class MediaBridgeTests: XCTestCase {
         XCTAssertEqual(emitted[0]["trackId"] as? String, "")
     }
 
-    func testEmitsAnUnavailablePayloadWhenNoSourceCanBeRead() {
+    /// A player that is running and cannot be read is the silent macOS 26
+    /// wall, and the panel must say so rather than pretending all is well.
+    func testARunningSourceThatCannotBeReadIsUnavailable() {
+        let bridge = MediaBridge(sources: [
+            StubSource(sourceId: "spotify", isRunning: true, state: nil)
+        ])
+
+        var emitted: [[String: Any]] = []
+        bridge.onUpdate = { emitted.append($0) }
+
+        bridge.refresh()
+
+        XCTAssertEqual(emitted.count, 1)
+        XCTAssertEqual(emitted[0]["available"] as? Bool, false)
+    }
+
+    /// Nothing running is **not** a failed read: there is nothing to read.
+    /// Reporting it as unavailable put "Player unavailable" on screen the
+    /// moment the user quit Spotify.
+    func testNoPlayerRunningIsIdleRatherThanUnavailable() {
         let bridge = MediaBridge(sources: [
             StubSource(sourceId: "spotify", isRunning: false, state: nil)
         ])
@@ -162,6 +209,7 @@ final class MediaBridgeTests: XCTestCase {
         bridge.refresh()
 
         XCTAssertEqual(emitted.count, 1)
-        XCTAssertEqual(emitted[0]["available"] as? Bool, false)
+        XCTAssertEqual(emitted[0]["available"] as? Bool, true)
+        XCTAssertEqual(emitted[0]["trackId"] as? String, "")
     }
 }

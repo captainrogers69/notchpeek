@@ -4,6 +4,7 @@ import 'package:notchpeek/features/music/data/models/now_playing_model.dart';
 import 'package:notchpeek/features/music/domain/entities/now_playing.dart';
 import 'package:notchpeek/features/music/domain/repositories/music_repository.dart';
 import 'package:notchpeek/shared/utils/enums/media_command.dart';
+import 'package:notchpeek/shared/utils/enums/music_source_id.dart';
 
 class MusicRepositoryImpl implements MusicRepository {
   MusicRepositoryImpl(this._source);
@@ -32,4 +33,8 @@ class MusicRepositoryImpl implements MusicRepository {
   @override
   Future<ApiResponse<bool>> setPolling(bool enabled) =>
       _source.setPolling(enabled);
+
+  @override
+  Future<ApiResponse<bool>> openPlayer(MusicSourceId source) =>
+      _source.openPlayer(source);
 }

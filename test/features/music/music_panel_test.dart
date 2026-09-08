@@ -3,9 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:notchpeek/app/theme.dart';
 import 'package:notchpeek/core/platform/capabilities.dart';
+import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/features/music/domain/entities/now_playing.dart';
+import 'package:notchpeek/features/music/domain/repositories/music_repository.dart';
 import 'package:notchpeek/features/music/presentation/music_providers.dart';
 import 'package:notchpeek/features/music/presentation/widgets/music_panel.dart';
+import 'package:notchpeek/shared/utils/enums/media_command.dart';
 import 'package:notchpeek/shared/utils/enums/music_source_id.dart';
 import 'package:notchpeek/shared/utils/enums/playback_state.dart';
 import 'package:notchpeek/shared/widgets/permission_prompt.dart';
@@ -25,16 +28,46 @@ const _playing = NowPlaying(
 /// Deliberately **not** a `MaterialApp`: production mounts this panel under a
 /// `WidgetsApp`, where there is no `Material` and no `Overlay`. Wrapping the
 /// test in Material would hide exactly the class of bug that the scrubber hit.
+class _RecordingMusicRepository implements MusicRepository {
+  final List<(MediaCommand, Duration?)> commands = [];
+  final List<MusicSourceId> opened = [];
+
+  @override
+  Stream<NowPlaying> watch() => const Stream.empty();
+
+  @override
+  Future<ApiResponse<bool>> command(
+    MediaCommand cmd, {
+    Duration? seekTo,
+  }) async {
+    commands.add((cmd, seekTo));
+    return ApiResponse.success(message: 'OK', data: true);
+  }
+
+  @override
+  Future<ApiResponse<bool>> openPlayer(MusicSourceId source) async {
+    opened.add(source);
+    return ApiResponse.success(message: 'OK', data: true);
+  }
+
+  @override
+  Future<ApiResponse<bool>> setPolling(bool enabled) async =>
+      ApiResponse.success(message: 'OK', data: true);
+}
+
 Future<void> _pump(
   WidgetTester tester, {
   required Capabilities caps,
   required NowPlaying track,
+  MusicRepository? repository,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         capabilitiesProvider.overrideWith((ref) => Stream.value(caps)),
         nowPlayingProvider.overrideWith((ref) => Stream.value(track)),
+        if (repository != null)
+          musicRepositoryProvider.overrideWithValue(repository),
       ],
       child: const Directionality(
         textDirection: TextDirection.ltr,
@@ -111,7 +144,7 @@ void main() {
       tester,
       caps: Capabilities.fromMap(const {
         'scriptingMedia': {'appleMusic': 'notDetermined'},
-        'playersRunning': true,
+        'runningPlayers': ['appleMusic'],
       }),
       track: const NowPlaying.unavailable(),
     );
@@ -131,7 +164,7 @@ void main() {
       tester,
       caps: Capabilities.fromMap(const {
         'scriptingMedia': {'appleMusic': 'notDetermined'},
-        'playersRunning': false,
+        'runningPlayers': <String>[],
       }),
       track: const NowPlaying.unavailable(),
     );
@@ -170,6 +203,96 @@ void main() {
 
     expect(find.byType(PermissionPrompt), findsNothing);
     expect(find.byIcon(Icons.play_arrow), findsNothing);
+  });
+
+  // Two empty states, two different fixes: no player open is answered by
+  // opening one, a player open with nothing queued by its own transport.
+  testWidgets('player open but nothing queued: shows a live transport', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'spotify': 'granted'},
+        'runningPlayers': ['spotify'],
+      }),
+      track: const NowPlaying(available: true, source: MusicSourceId.spotify),
+    );
+
+    expect(find.text('Not Playing'), findsOneWidget);
+    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    expect(find.byIcon(Icons.skip_next), findsOneWidget);
+    expect(
+      find.text('Open Spotify'),
+      findsNothing,
+      reason: 'the player is already open',
+    );
+  });
+
+  // The payload carries no source when there was nothing to read, which left
+  // the thumbnail and the transport with no target at all.
+  testWidgets('the empty state targets the running player, not the payload', (
+    tester,
+  ) async {
+    final repo = _RecordingMusicRepository();
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'spotify': 'granted'},
+        'runningPlayers': ['spotify'],
+      }),
+      // No sourceId: this is what a read of nothing looks like.
+      track: const NowPlaying(available: true),
+      repository: repo,
+    );
+
+    expect(find.text('Not Playing'), findsOneWidget);
+    expect(find.text('Spotify'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.music_note));
+    await tester.pump();
+    expect(repo.opened, [MusicSourceId.spotify]);
+
+    await tester.tap(find.byIcon(Icons.play_arrow));
+    await tester.pump();
+    expect(repo.commands.single.$1, MediaCommand.playPause);
+  });
+
+  testWidgets('tapping the track area brings the player forward', (
+    tester,
+  ) async {
+    final repo = _RecordingMusicRepository();
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'spotify': 'granted'},
+      }),
+      track: _playing,
+      repository: repo,
+    );
+
+    await tester.tap(find.text('Sonu Nigam'));
+    await tester.pump();
+
+    expect(repo.opened, [MusicSourceId.spotify]);
+  });
+
+  testWidgets('pressing play does not also raise the player', (tester) async {
+    final repo = _RecordingMusicRepository();
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'spotify': 'granted'},
+      }),
+      track: _playing,
+      repository: repo,
+    );
+
+    await tester.tap(find.byIcon(Icons.pause));
+    await tester.pump();
+
+    expect(repo.commands.single.$1, MediaCommand.playPause);
+    expect(repo.opened, isEmpty, reason: 'the button wins the gesture');
   });
 
   testWidgets(
@@ -211,7 +334,7 @@ void main() {
       tester,
       caps: Capabilities.fromMap(const {
         'scriptingMedia': {'appleMusic': 'notDetermined'},
-        'playersRunning': true,
+        'runningPlayers': ['appleMusic'],
       }),
       track: const NowPlaying.unavailable(),
     );
@@ -226,7 +349,7 @@ void main() {
       tester,
       caps: Capabilities.fromMap(const {
         'scriptingMedia': {'appleMusic': 'notDetermined'},
-        'playersRunning': false,
+        'runningPlayers': <String>[],
       }),
       track: const NowPlaying.unavailable(),
     );

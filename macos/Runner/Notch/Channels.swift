@@ -30,6 +30,9 @@ enum ControlMethod {
     /// An agent app has no Dock icon and no menu bar, so without this there is
     /// no way to quit it but `pkill`.
     static let quit = "quit"
+
+    /// Launches or fronts a player, from the panel's own button.
+    static let openPlayer = "openPlayer"
 }
 
 /// The `what` values `ControlMethod.requestPermission` accepts. A request and

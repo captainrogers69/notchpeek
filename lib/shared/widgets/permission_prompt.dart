@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notchpeek/app/theme.dart';
+import 'package:notchpeek/shared/widgets/notch_pill_button.dart';
 
 /// The **needs-permission** state, shared by every panel. Nine panels need the
 /// same three states; nine copies is nine bugs (architecture-playbook §8).
@@ -37,38 +38,8 @@ class PermissionPrompt extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _PromptButton(label: actionLabel, onPressed: onPressed),
+          NotchPillButton(label: actionLabel, onPressed: onPressed),
         ],
-      ),
-    );
-  }
-}
-
-class _PromptButton extends StatelessWidget {
-  const _PromptButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: NotchColors.accent,
-          borderRadius: BorderRadius.circular(NotchRadii.pill),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: NotchColors.primaryText,
-              fontSize: 12,
-            ),
-          ),
-        ),
       ),
     );
   }

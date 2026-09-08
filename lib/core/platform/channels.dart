@@ -26,6 +26,9 @@ abstract final class ControlMethod {
   /// An agent app has no Dock icon and no menu bar, so without this there is
   /// no way to quit it but `pkill`.
   static const String quit = 'quit';
+
+  /// Launches or fronts a player, from the panel's own button.
+  static const String openPlayer = 'openPlayer';
 }
 
 /// The `what` values [ControlMethod.requestPermission] accepts. A request and

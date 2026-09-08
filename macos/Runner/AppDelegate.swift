@@ -20,6 +20,13 @@ class AppDelegate: FlutterAppDelegate {
     private var lastCapabilities: [String: Any]?
     private var capabilityToken: NSObjectProtocol?
 
+    /// The capability probe blocks — see `CapabilityProbe.snapshot()` — so it
+    /// runs here and never on the main thread. Serial, so an app-switch storm
+    /// queues one probe behind another instead of piling up threads that are
+    /// all parked in the Apple Event machinery.
+    private let capabilityQueue = DispatchQueue(
+        label: "com.capcraft.notchpeek.capabilities")
+
     /// An agent app has no windows to close. Quitting is the settings window's
     /// job, not the last window's.
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication)
@@ -67,7 +74,14 @@ class AppDelegate: FlutterAppDelegate {
         bridge.start()
         self.bridge = bridge
 
+        // Safe to answer inline: the probe sends no Apple Events.
         bridge.onGetCapabilities = { CapabilityProbe.snapshot() }
+
+        // A permission answer discovered by a read has to reach the panel,
+        // or it waits for the next app switch to find out.
+        CapabilityProbe.onPermissionChanged = { [weak self, weak bridge] in
+            self?.pushCapabilities(via: bridge)
+        }
 
         bridge.onRequestPermission = { [weak self, weak bridge] what in
             switch what {
@@ -99,6 +113,16 @@ class AppDelegate: FlutterAppDelegate {
         // Replied to before terminating, so Dart is not left awaiting a reply
         // from a process that is going away.
         bridge.onQuit = { NSApp.terminate(nil) }
+
+        bridge.onOpenPlayer = { what in
+            switch what {
+            case "appleMusic":
+                CapabilityProbe.openPlayer(CapabilityProbe.BundleId.appleMusic)
+            case "spotify":
+                CapabilityProbe.openPlayer(CapabilityProbe.BundleId.spotify)
+            default: break
+            }
+        }
 
         // Permissions change while the user is in System Settings, and this
         // app is never the one they come back *to*: an agent app whose only
@@ -184,13 +208,18 @@ class AppDelegate: FlutterAppDelegate {
     /// `didActivateApplicationNotification` fires on every app switch, and
     /// re-sending an identical snapshot would wake the shell for nothing.
     private func pushCapabilities(via bridge: ChannelBridge?) {
-        let snapshot = CapabilityProbe.snapshot()
-        if let last = lastCapabilities,
-            NSDictionary(dictionary: last).isEqual(to: snapshot)
-        {
-            return
+        capabilityQueue.async { [weak self, weak bridge] in
+            let snapshot = CapabilityProbe.snapshot()
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if let last = self.lastCapabilities,
+                    NSDictionary(dictionary: last).isEqual(to: snapshot)
+                {
+                    return
+                }
+                self.lastCapabilities = snapshot
+                bridge?.sendSystem(SystemEvent.capabilities, snapshot)
+            }
         }
-        lastCapabilities = snapshot
-        bridge?.sendSystem(SystemEvent.capabilities, snapshot)
     }
 }

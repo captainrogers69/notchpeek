@@ -3,11 +3,13 @@ import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/core/platform/channel_service.dart';
 import 'package:notchpeek/core/platform/channels.dart';
 import 'package:notchpeek/shared/utils/enums/media_command.dart';
+import 'package:notchpeek/shared/utils/enums/music_source_id.dart';
 
 abstract class MusicDataSource {
   Stream<Map<String, Object?>> watchMediaEvents();
   Future<ApiResponse<bool>> command(MediaCommand command, {Duration? seekTo});
   Future<ApiResponse<bool>> setPolling(bool enabled);
+  Future<ApiResponse<bool>> openPlayer(MusicSourceId source);
 }
 
 class MusicDataSourceImpl implements MusicDataSource {
@@ -43,4 +45,12 @@ class MusicDataSourceImpl implements MusicDataSource {
     ControlMethod.setMediaPolling,
     {'enabled': enabled},
   );
+
+  @override
+  Future<ApiResponse<bool>> openPlayer(MusicSourceId source) {
+    _log.debug('open ${source.apiValue}');
+    return _channels.invoke<bool>(ControlMethod.openPlayer, {
+      'what': source.apiValue,
+    });
+  }
 }

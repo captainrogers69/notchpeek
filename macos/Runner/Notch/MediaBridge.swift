@@ -100,7 +100,14 @@ final class MediaBridge {
         let seconds = payload["seconds"] as? Double
 
         queue.async { [weak self] in
-            guard let self, let source = MediaBridge.select(from: self.sources)
+            guard let self else { return }
+            // `select` only returns a source it could *read*. A player that is
+            // running but idle — or one we cannot read — still takes
+            // commands, and dropping them here is why play did nothing in the
+            // empty state.
+            guard
+                let source = MediaBridge.select(from: self.sources)
+                    ?? self.sources.first(where: { $0.isRunning })
             else { return }
             source.send(command: command, seekTo: seconds)
             // Read straight back so the UI does not wait a tick to catch up.
@@ -113,7 +120,19 @@ final class MediaBridge {
     func refresh() {
         guard let (_, payload) = MediaBridge.readable(from: sources) else {
             lastTrackId = nil
-            onUpdate?(["available": false])
+            // No player running at all is **not** a failed read — there is
+            // simply nothing to read, and the panel should say "nothing
+            // playing" and offer to open one. Only a player that is running
+            // and cannot be read is unavailable (spec §7).
+            if sources.contains(where: { $0.isRunning }) {
+                onUpdate?(["available": false])
+            } else {
+                onUpdate?([
+                    "available": true,
+                    "trackId": "",
+                    "state": "stopped",
+                ])
+            }
             return
         }
 

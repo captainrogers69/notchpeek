@@ -37,7 +37,23 @@ class ScriptingSource: MusicSource {
 
     func read() -> NowPlayingPayload? {
         guard let app else { return nil }
-        return read(from: app)
+
+        // The read is also how permission is discovered. Asking
+        // `AEDeterminePermissionToAutomateTarget` instead parks forever once
+        // the player is running; this call has a 2 second timeout and has to
+        // happen anyway.
+        let trap = ScriptingErrorTrap()
+        app.delegate = trap
+        let payload = read(from: app)
+
+        if trap.wasRefused {
+            CapabilityProbe.remember("denied", for: bundleIdentifier)
+            return nil
+        }
+        if payload != nil {
+            CapabilityProbe.remember("granted", for: bundleIdentifier)
+        }
+        return payload
     }
 
     /// Overridden per player.
@@ -114,5 +130,22 @@ class ScriptingSource: MusicSource {
 
     func object(_ object: NSObject?, _ key: String) -> NSObject? {
         object?.value(forKey: key) as? NSObject
+    }
+}
+
+/// Catches the one Apple Event error that matters: `errAEEventNotPermitted`,
+/// which is how a refused automation request comes back. ScriptingBridge
+/// otherwise swallows failures and hands back nil, which is indistinguishable
+/// from "nothing playing".
+private final class ScriptingErrorTrap: NSObject, SBApplicationDelegate {
+    private(set) var wasRefused = false
+
+    func eventDidFail(
+        _ event: UnsafePointer<AppleEvent>, withError error: any Error
+    ) -> Any? {
+        if (error as NSError).code == Int(errAEEventNotPermitted) {
+            wasRefused = true
+        }
+        return nil
     }
 }

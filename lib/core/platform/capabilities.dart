@@ -4,6 +4,7 @@ import 'package:notchpeek/core/platform/channel_service.dart';
 import 'package:notchpeek/core/platform/channels.dart';
 import 'package:notchpeek/shared/utils/enums/build_flavor.dart';
 import 'package:notchpeek/shared/utils/enums/capability_state.dart';
+import 'package:notchpeek/shared/utils/enums/music_source_id.dart';
 
 /// The single source of truth for what this build, this OS and these
 /// permissions can do (architecture-playbook §4.4). The probe reports **OS
@@ -19,7 +20,7 @@ class Capabilities extends Equatable {
     this.systemWideMediaCommand = false,
     this.calendar = CapabilityState.notDetermined,
     this.camera = CapabilityState.notDetermined,
-    this.playersRunning = false,
+    this.runningPlayers = const [],
   });
 
   factory Capabilities.fromMap(Map<String, Object?> json) {
@@ -35,7 +36,7 @@ class Capabilities extends Equatable {
       systemWideMediaCommand: json['systemWideMediaCommand'] as bool? ?? false,
       calendar: CapabilityState.fromApi(json['calendar'] as String?),
       camera: CapabilityState.fromApi(json['camera'] as String?),
-      playersRunning: json['playersRunning'] as bool? ?? false,
+      runningPlayers: _players(json['runningPlayers']),
     );
   }
 
@@ -55,10 +56,27 @@ class Capabilities extends Equatable {
   final CapabilityState calendar; // M2
   final CapabilityState camera; // M3
 
-  /// Whether a player is running *right now*. Permission state alone cannot
-  /// drive the panel: macOS raises no prompt for a player that is not running,
-  /// so the panel has to be able to say "start one first".
-  final bool playersRunning;
+  /// *Which* players are running right now, in the order the probe reports
+  /// them. Permission state alone cannot drive the panel — macOS raises no
+  /// prompt for a player that is not running — and a bare bool cannot name the
+  /// player a command should go to, or the one a tap should bring forward.
+  final List<MusicSourceId> runningPlayers;
+
+  bool get playersRunning => runningPlayers.isNotEmpty;
+
+  /// The player a command or a tap should target: whichever is running, else
+  /// nothing to target.
+  MusicSourceId get activePlayer =>
+      runningPlayers.isEmpty ? MusicSourceId.none : runningPlayers.first;
+
+  static List<MusicSourceId> _players(Object? value) => switch (value) {
+    final List<Object?> ids => [
+      for (final id in ids)
+        if (id is String && MusicSourceId.fromApi(id) != MusicSourceId.none)
+          MusicSourceId.fromApi(id),
+    ],
+    _ => const [],
+  };
 
   /// The music panel is ready if *either* player is. It is denied only when
   /// both are — one refused player is not a refusal of the feature.
@@ -84,7 +102,7 @@ class Capabilities extends Equatable {
     systemWideMediaCommand,
     calendar,
     camera,
-    playersRunning,
+    runningPlayers,
   ];
 }
 
