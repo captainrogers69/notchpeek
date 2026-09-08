@@ -2,20 +2,20 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gohomes/core/network/endpoints/api_method.dart';
-import 'package:gohomes/core/network/errors/api_error.dart';
-import 'package:gohomes/core/network/errors/api_response.dart' show ApiResponse;
-import 'package:gohomes/core/network/interceptor/dio_interceptor.dart';
-import 'package:gohomes/core/network/interceptor/log_interceptor.dart';
-import 'package:gohomes/data/manager/service_base.dart' show ServiceBase;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:notchpeek/core/network/endpoints/api_method.dart';
+import 'package:notchpeek/core/network/errors/api_error.dart';
+import 'package:notchpeek/core/network/errors/api_response.dart'
+    show ApiResponse;
+import 'package:notchpeek/core/network/interceptor/dio_interceptor.dart';
+import 'package:notchpeek/core/network/interceptor/log_interceptor.dart';
 
 /// REST client for this backend, per docs/playbook/architecture-playbook.md
 /// §3. Every endpoint responds with the same envelope:
 /// `{"success": bool, "data": ..., "message": "..."}` — no GraphQL.
 final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(
-    baseUrl: ServiceBase.apiBaseUrl,
+    baseUrl: "",
     interceptor: ApiInterceptor(ref),
     logInterceptor: kDebugMode ? ApiLogInterceptor() : null,
   );
@@ -54,8 +54,12 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) {
-    return _send(ApiMethod.getr, path,
-        queryParameters: queryParameters, headers: headers);
+    return _send(
+      ApiMethod.getr,
+      path,
+      queryParameters: queryParameters,
+      headers: headers,
+    );
   }
 
   Future<ApiResponse<dynamic>> post(
@@ -165,12 +169,15 @@ class ApiService {
     }
 
     final success = body['success'] == true;
-    final message = body['message']?.toString() ??
+    final message =
+        body['message']?.toString() ??
         (success ? 'Success' : 'Something went wrong');
 
     if (!success) {
       return ApiResponse.error(
-          message: message, statusCode: response.statusCode);
+        message: message,
+        statusCode: response.statusCode,
+      );
     }
 
     return ApiResponse.success(message: message, data: body['data']);

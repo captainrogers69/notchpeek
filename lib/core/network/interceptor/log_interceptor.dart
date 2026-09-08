@@ -3,7 +3,7 @@ import 'dart:convert';
 // import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:gohomes/utils/helpers/app_logger.dart';
+import 'package:notchpeek/utils/helpers/app_logger.dart';
 
 class _ApiConfiguration {
   // static const Duration timeout = Duration(seconds: 60);
@@ -22,8 +22,8 @@ class _ApiConfiguration {
 }); */
 
 class ApiLogInterceptor extends Interceptor {
-  final AppLogger logger;
-  ApiLogInterceptor() : logger = AppLogger.forTag('ApiLogInterceptor');
+  final NotchLogger logger;
+  ApiLogInterceptor() : logger = NotchLogger.forTag('ApiLogInterceptor');
 
   String _cURLRepresentation(RequestOptions options) {
     final components = <String>["curl -i"];
@@ -43,8 +43,9 @@ class ApiLogInterceptor extends Interceptor {
     if (options.data != null) {
       if (options.data is FormData) {
         final formData = options.data as FormData;
-        final fields =
-            formData.fields.map((e) => '"${e.key}": "${e.value}"').join(',');
+        final fields = formData.fields
+            .map((e) => '"${e.key}": "${e.value}"')
+            .join(',');
         components.add('-d "{$fields}"');
       } else {
         final jsonData = json.encode(options.data);
@@ -100,7 +101,8 @@ class ApiLogInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (_ApiConfiguration.logError) {
       logger.error(
-          "Error{${err.response?.statusCode}}: URI: ${err.requestOptions.uri.toString().trim()}\n Type: ${err.type.toString().trim()}\n Message: ${err.message.toString().trim()}\n error data:${err.response?.data.toString().trim()}");
+        "Error{${err.response?.statusCode}}: URI: ${err.requestOptions.uri.toString().trim()}\n Type: ${err.type.toString().trim()}\n Message: ${err.message.toString().trim()}\n error data:${err.response?.data.toString().trim()}",
+      );
     }
 
     handler.next(err);

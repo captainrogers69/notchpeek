@@ -1,12 +1,10 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '/data/services/local_service.dart';
-import '/data/services/routing_service.dart';
-import '/features/auth_revamp/presentation/screens/login_screen.dart';
-import '/features/profile_revamp/presentation/notifier/profile_notifier.dart';
+// import '/data/services/local_service.dart';
+// import '/data/services/routing_service.dart';
+// import '/features/auth_revamp/presentation/screens/login_screen.dart';
+// import '/features/profile_revamp/presentation/notifier/profile_notifier.dart';
 
 /// Injects the stored bearer token into every request, and on a 401 clears
 /// the session and routes to login.
@@ -16,6 +14,7 @@ import '/features/profile_revamp/presentation/notifier/profile_notifier.dart';
 /// retry, so a 401 is treated as a hard session expiry, same as the manual
 /// logout flow in settings_screen.dart.
 class ApiInterceptor extends Interceptor {
+  // ignore: unused_field
   final Ref _ref;
   ApiInterceptor(this._ref);
 
@@ -24,11 +23,11 @@ class ApiInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token =
-        await _ref.read(localStorageProvider).fetch(Keys.accessaccessToken);
-    if (token.isNotEmpty) {
-      options.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
-    }
+    // final token =
+    //     await _ref.read(localStorageProvider).fetch(Keys.accessaccessToken);
+    // if (token.isNotEmpty) {
+    //   options.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
+    // }
     handler.next(options);
   }
 
@@ -41,10 +40,10 @@ class ApiInterceptor extends Interceptor {
   }
 
   void _handleSessionExpired() {
-    final storage = _ref.read(localStorageProvider);
-    storage.clear(Keys.accessaccessToken);
-    storage.clear(Keys.useruserId);
-    _ref.read(profileNotifierProvider.notifier).setUser(null);
-    _ref.read(routingService).pushReplacement(LoginScreen.id);
+    // final storage = _ref.read(localStorageProvider);
+    // storage.clear(Keys.accessaccessToken);
+    // storage.clear(Keys.useruserId);
+    // _ref.read(profileNotifierProvider.notifier).setUser(null);
+    // _ref.read(routingService).pushReplacement(LoginScreen.id);
   }
 }

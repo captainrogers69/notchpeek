@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:gohomes/core/network/errors/api_response.dart' show ApiResponse;
+import 'package:notchpeek/core/network/errors/api_response.dart'
+    show ApiResponse;
 
 class ApiErrorHandler {
   /// Handles Dio transport-level errors (timeouts, network, bad HTTP status).
