@@ -26,6 +26,18 @@ enum ControlMethod {
     /// expanded, and not at all while collapsed" needs a signal and none of
     /// the five carries it. Reconciled into the spec by the docs task.
     static let setMediaPolling = "setMediaPolling"
+
+    /// An agent app has no Dock icon and no menu bar, so without this there is
+    /// no way to quit it but `pkill`.
+    static let quit = "quit"
+}
+
+/// The `what` values `ControlMethod.requestPermission` accepts. A request and
+/// a trip to System Settings are different actions: only the first can produce
+/// the prompt, and only the second helps once the user has refused.
+enum PermissionTarget {
+    static let players = "players"
+    static let settings = "settings"
 }
 
 /// Every event kind that crosses `NotchChannel.system`.

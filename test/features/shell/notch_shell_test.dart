@@ -9,6 +9,7 @@ import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/notch_shell.dart';
 import 'package:notchpeek/shared/utils/enums/notch_state.dart';
 import 'package:notchpeek/shared/utils/enums/peek_kind.dart';
+import 'package:notchpeek/shared/widgets/notch_close_button.dart';
 
 const _geometry = NotchGeometry(
   screenWidth: 1470,
@@ -23,6 +24,7 @@ const _geometry = NotchGeometry(
 
 class _RecordingShellRepository implements ShellRepository {
   final List<Rect> rects = [];
+  int quits = 0;
 
   @override
   Stream<NotchGeometry> watchGeometry() => const Stream.empty();
@@ -33,6 +35,12 @@ class _RecordingShellRepository implements ShellRepository {
   @override
   Future<ApiResponse<bool>> performHaptic() async =>
       ApiResponse.success(message: 'OK', data: true);
+
+  @override
+  Future<ApiResponse<bool>> quit() async {
+    quits++;
+    return ApiResponse.success(message: 'OK', data: true);
+  }
 
   @override
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect) async {
@@ -120,6 +128,83 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('panel'), findsOneWidget);
+  });
+
+  // The only way out of an agent app with no Dock icon and no menu bar, so it
+  // belongs to the shell: a panel that renders nothing must not be able to
+  // take it away.
+  testWidgets('the close button shows for every state that draws content', (
+    tester,
+  ) async {
+    final repo = _RecordingShellRepository();
+    final container = await _pump(tester, repo);
+    final notifier = container.read(shellNotifierProvider.notifier);
+
+    expect(
+      find.byType(NotchCloseButton),
+      findsNothing,
+      reason: 'nothing is drawn while collapsed',
+    );
+
+    notifier.hoverEntered();
+    await tester.pumpAndSettle();
+    expect(find.byType(NotchCloseButton), findsOneWidget);
+
+    notifier.hoverExited();
+    await tester.pumpAndSettle();
+    notifier.peekRequested(PeekKind.charger);
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(NotchCloseButton),
+      findsOneWidget,
+      reason: 'a peek is a state too',
+    );
+    notifier.peekExpired();
+  });
+
+  testWidgets('tapping the close button quits the app', (tester) async {
+    final repo = _RecordingShellRepository();
+    final container = await _pump(tester, repo);
+
+    container.read(shellNotifierProvider.notifier).hoverEntered();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(NotchCloseButton));
+    await tester.pump();
+
+    expect(repo.quits, 1);
+  });
+
+  // An empty panel is exactly when the user most needs the way out.
+  testWidgets('the close button survives a child that renders nothing', (
+    tester,
+  ) async {
+    final repo = _RecordingShellRepository();
+    final container = ProviderContainer(
+      overrides: [
+        shellRepositoryProvider.overrideWithValue(repo),
+        peekDwellProvider.overrideWithValue(const Duration(seconds: 30)),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.binding.setSurfaceSize(
+      Size(_geometry.screenWidth, NotchSizes.canvasHeight),
+    );
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotchShell(geometry: _geometry, child: SizedBox.shrink()),
+        ),
+      ),
+    );
+    container.read(shellNotifierProvider.notifier).hoverEntered();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NotchCloseButton), findsOneWidget);
   });
 
   testWidgets('golden: collapsed, peeking and expanded', (tester) async {

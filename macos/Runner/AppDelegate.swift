@@ -69,20 +69,36 @@ class AppDelegate: FlutterAppDelegate {
 
         bridge.onGetCapabilities = { CapabilityProbe.snapshot() }
 
-        bridge.onRequestPermission = { what in
+        bridge.onRequestPermission = { [weak self, weak bridge] what in
             switch what {
-            case "appleMusic":
-                CapabilityProbe.requestAppleEvents(
-                    for: CapabilityProbe.BundleId.appleMusic)
-            case "spotify":
-                CapabilityProbe.requestAppleEvents(
-                    for: CapabilityProbe.BundleId.spotify)
+            case PermissionTarget.settings:
+                CapabilityProbe.openAutomationSettings()
+
+            case PermissionTarget.players:
+                // Off the main thread: the request blocks until the user
+                // answers the prompt. Asking for every installed player is
+                // deliberate — the panel is ready if *either* is.
+                DispatchQueue.global(qos: .userInitiated).async {
+                    for bundleId in CapabilityProbe.installedPlayers {
+                        CapabilityProbe.requestAppleEvents(for: bundleId)
+                    }
+                    // Report the answer straight away rather than waiting for
+                    // the next app switch to re-probe.
+                    DispatchQueue.main.async {
+                        self?.pushCapabilities(via: bridge)
+                    }
+                }
+
             default:
                 CapabilityProbe.openAutomationSettings()
             }
         }
 
         bridge.onOpenSettings = { CapabilityProbe.openAutomationSettings() }
+
+        // Replied to before terminating, so Dart is not left awaiting a reply
+        // from a process that is going away.
+        bridge.onQuit = { NSApp.terminate(nil) }
 
         // Permissions change while the user is in System Settings, and this
         // app is never the one they come back *to*: an agent app whose only

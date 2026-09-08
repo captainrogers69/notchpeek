@@ -22,6 +22,18 @@ abstract final class ControlMethod {
   /// and not at all while collapsed" needs a signal and none of the five
   /// carries it. Reconciled into the spec by the docs task.
   static const String setMediaPolling = 'setMediaPolling';
+
+  /// An agent app has no Dock icon and no menu bar, so without this there is
+  /// no way to quit it but `pkill`.
+  static const String quit = 'quit';
+}
+
+/// The `what` values [ControlMethod.requestPermission] accepts. A request and
+/// a trip to System Settings are different actions: only the first can produce
+/// the macOS prompt, and only the second helps once the user has refused.
+abstract final class PermissionTarget {
+  static const String players = 'players';
+  static const String settings = 'settings';
 }
 
 /// Discriminator on every payload that crosses [Channels.system].

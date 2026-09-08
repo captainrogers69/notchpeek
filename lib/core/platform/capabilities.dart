@@ -19,6 +19,7 @@ class Capabilities extends Equatable {
     this.systemWideMediaCommand = false,
     this.calendar = CapabilityState.notDetermined,
     this.camera = CapabilityState.notDetermined,
+    this.playersRunning = false,
   });
 
   factory Capabilities.fromMap(Map<String, Object?> json) {
@@ -34,6 +35,7 @@ class Capabilities extends Equatable {
       systemWideMediaCommand: json['systemWideMediaCommand'] as bool? ?? false,
       calendar: CapabilityState.fromApi(json['calendar'] as String?),
       camera: CapabilityState.fromApi(json['camera'] as String?),
+      playersRunning: json['playersRunning'] as bool? ?? false,
     );
   }
 
@@ -52,6 +54,11 @@ class Capabilities extends Equatable {
 
   final CapabilityState calendar; // M2
   final CapabilityState camera; // M3
+
+  /// Whether a player is running *right now*. Permission state alone cannot
+  /// drive the panel: macOS raises no prompt for a player that is not running,
+  /// so the panel has to be able to say "start one first".
+  final bool playersRunning;
 
   /// The music panel is ready if *either* player is. It is denied only when
   /// both are — one refused player is not a refusal of the feature.
@@ -77,6 +84,7 @@ class Capabilities extends Equatable {
     systemWideMediaCommand,
     calendar,
     camera,
+    playersRunning,
   ];
 }
 

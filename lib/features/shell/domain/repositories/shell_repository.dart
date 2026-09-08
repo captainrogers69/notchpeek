@@ -12,4 +12,8 @@ abstract class ShellRepository {
 
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect);
   Future<ApiResponse<bool>> performHaptic();
+
+  /// Terminates the app. The shell's close button is the only way out of an
+  /// agent app with no Dock icon and no menu bar.
+  Future<ApiResponse<bool>> quit();
 }

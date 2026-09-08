@@ -10,6 +10,7 @@ abstract class ShellDataSource {
   Stream<Map<String, Object?>> watchHoverEvents();
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect);
   Future<ApiResponse<bool>> performHaptic();
+  Future<ApiResponse<bool>> quit();
 }
 
 /// The only place the shell feature touches a channel
@@ -44,6 +45,12 @@ class ShellDataSourceImpl implements ShellDataSource {
   @override
   Future<ApiResponse<bool>> performHaptic() =>
       _channels.invoke<bool>(ControlMethod.haptic);
+
+  @override
+  Future<ApiResponse<bool>> quit() {
+    _log.debug('quit requested');
+    return _channels.invoke<bool>(ControlMethod.quit);
+  }
 
   @override
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect) async {

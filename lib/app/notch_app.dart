@@ -3,6 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:notchpeek/app/theme.dart';
 import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/notch_shell.dart';
+import 'package:notchpeek/features/shell/presentation/widgets/panel_host.dart';
+import 'package:notchpeek/features/shell/presentation/widgets/peek_content.dart';
 
 /// The root widget. There is no routing package and no navigator: one window,
 /// one panel, tab selection is state (architecture-playbook §9).
@@ -39,10 +41,23 @@ class NotchSurface extends ConsumerWidget {
     return switch (geometry) {
       AsyncData(:final value) => NotchShell(
         geometry: value,
-        // The tab strip and panels land here in Task 21.
-        child: const SizedBox.shrink(),
+        child: const _ShellContent(),
       ),
       _ => const SizedBox.shrink(),
     };
+  }
+}
+
+/// The peek body and the full panel are different content, not the same
+/// content at two sizes.
+class _ShellContent extends ConsumerWidget {
+  const _ShellContent();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final expanded = ref.watch(
+      shellNotifierProvider.select((s) => s.isExpanded),
+    );
+    return expanded ? const PanelHost() : const PeekContent();
   }
 }

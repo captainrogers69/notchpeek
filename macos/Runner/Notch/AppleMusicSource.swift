@@ -15,7 +15,11 @@ final class AppleMusicSource: ScriptingSource {
     }
 
     override func read(from app: SBApplication) -> NowPlayingPayload? {
-        guard let track = object(app, "currentTrack") else { return nil }
+        guard let state = playerState(of: app) else { return nil }
+
+        guard let track = object(app, "currentTrack") else {
+            return idle(state: state)
+        }
 
         // Music's persistent id is stable across launches; `databaseID` is not
         // unique for streamed tracks, so fall back to a composed key.
@@ -24,7 +28,7 @@ final class AppleMusicSource: ScriptingSource {
             trackId =
                 "\(string(track, "name"))|\(string(track, "artist"))|\(string(track, "album"))"
         }
-        guard trackId != "||" else { return nil }
+        guard trackId != "||" else { return idle(state: state) }
 
         let duration = double(track, "duration")  // already seconds
         let position = MediaUnits.clamp(
@@ -45,8 +49,7 @@ final class AppleMusicSource: ScriptingSource {
             album: string(track, "album"),
             duration: duration,
             position: position,
-            state: MediaUnits.playbackState(
-                fromFourCharCode: fourCharCode(app, "playerState")),
+            state: state,
             artworkPath: artwork
         )
     }

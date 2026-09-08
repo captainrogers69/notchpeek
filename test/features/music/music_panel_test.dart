@@ -104,9 +104,47 @@ void main() {
     expect(find.byIcon(Icons.play_arrow), findsOneWidget);
   });
 
-  testWidgets('needs permission: explains and offers Open Settings', (
+  testWidgets('never asked, with a player running: offers Grant Access', (
     tester,
   ) async {
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'appleMusic': 'notDetermined'},
+        'playersRunning': true,
+      }),
+      track: const NowPlaying.unavailable(),
+    );
+
+    expect(find.text('Grant Access'), findsOneWidget);
+    expect(
+      find.text('Open Settings'),
+      findsNothing,
+      reason: 'that pane has no row for us until a request has been made',
+    );
+  });
+
+  testWidgets('never asked, no player running: says to start one', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'appleMusic': 'notDetermined'},
+        'playersRunning': false,
+      }),
+      track: const NowPlaying.unavailable(),
+    );
+
+    // macOS raises no prompt for a stopped target, so this must not offer
+    // "Grant Access" — but it must still offer a way into the pane rather
+    // than being a dead end.
+    expect(find.textContaining('Open Apple Music or Spotify'), findsOneWidget);
+    expect(find.text('Open Settings'), findsOneWidget);
+    expect(find.text('Grant Access'), findsNothing);
+  });
+
+  testWidgets('refused: explains and offers Open Settings', (tester) async {
     await _pump(
       tester,
       caps: Capabilities.fromMap(const {
@@ -168,7 +206,37 @@ void main() {
     );
   });
 
-  testWidgets('golden: needs permission', (tester) async {
+  testWidgets('golden: never asked', (tester) async {
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'appleMusic': 'notDetermined'},
+        'playersRunning': true,
+      }),
+      track: const NowPlaying.unavailable(),
+    );
+    await expectLater(
+      find.byType(MusicPanel),
+      matchesGoldenFile('goldens/music_not_determined.png'),
+    );
+  });
+
+  testWidgets('golden: no player running', (tester) async {
+    await _pump(
+      tester,
+      caps: Capabilities.fromMap(const {
+        'scriptingMedia': {'appleMusic': 'notDetermined'},
+        'playersRunning': false,
+      }),
+      track: const NowPlaying.unavailable(),
+    );
+    await expectLater(
+      find.byType(MusicPanel),
+      matchesGoldenFile('goldens/music_no_player.png'),
+    );
+  });
+
+  testWidgets('golden: refused', (tester) async {
     await _pump(
       tester,
       caps: Capabilities.fromMap(const {

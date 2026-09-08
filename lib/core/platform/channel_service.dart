@@ -51,9 +51,61 @@ class ChannelService {
     }
   }
 
-  Stream<Map<String, Object?>> get systemEvents => _events(_system, 'system');
+  /// **One subscription per channel, shared by every consumer.**
+  ///
+  /// `EventChannel.receiveBroadcastStream` registers its handler with
+  /// `binaryMessenger.setMessageHandler(name, ...)`, and there is exactly one
+  /// handler slot per channel name. A second call for the same channel
+  /// silently unregisters the first, and a cancel nulls it for everyone. These
+  /// were getters that opened a fresh channel per access, so the third
+  /// consumer of `notchpeek/system` — capabilities, arriving on the first
+  /// expand — made hover go deaf and the notch could never collapse again.
+  late final Stream<Map<String, Object?>> systemEvents = _shared(
+    _system,
+    'system',
+    (event) => event[SystemEventKind.key] as String?,
+  );
 
-  Stream<Map<String, Object?>> get mediaEvents => _events(_media, 'media');
+  late final Stream<Map<String, Object?>> mediaEvents = _shared(
+    _media,
+    'media',
+    (_) => 'media',
+  );
+
+  /// Retains the last payload per key and hands it to whoever subscribes next,
+  /// which is the Dart-side twin of Swift's `ReplayBuffer`. Without it a late
+  /// consumer would wait for the *next* event: capabilities subscribes on the
+  /// first expand, long after the launch snapshot has been and gone.
+  Stream<Map<String, Object?>> _shared(
+    EventChannel channel,
+    String tag,
+    String? Function(Map<String, Object?> event) keyOf,
+  ) {
+    final latest = <String, Map<String, Object?>>{};
+
+    final source = _events(channel, tag)
+        .map((event) {
+          final key = keyOf(event);
+          if (key != null) latest[key] = event;
+          return event;
+        })
+        .asBroadcastStream(
+          // Deliberately does not cancel: the native sink must outlive any
+          // one consumer, or the next cancel takes the channel down with it.
+          onCancel: (_) {},
+        );
+
+    return Stream.multi((controller) {
+      for (final retained in latest.values) {
+        controller.add(retained);
+      }
+      final subscription = source.listen(
+        controller.add,
+        onError: controller.addError,
+      );
+      controller.onCancel = subscription.cancel;
+    });
+  }
 
   Stream<Map<String, Object?>> _events(EventChannel channel, String tag) {
     return resilientStream<Map<String, Object?>>(

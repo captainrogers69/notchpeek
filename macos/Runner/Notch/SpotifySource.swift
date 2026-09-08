@@ -9,10 +9,14 @@ final class SpotifySource: ScriptingSource {
     }
 
     override func read(from app: SBApplication) -> NowPlayingPayload? {
-        guard let track = object(app, "currentTrack") else { return nil }
+        guard let state = playerState(of: app) else { return nil }
+
+        guard let track = object(app, "currentTrack") else {
+            return idle(state: state)
+        }
 
         let trackId = string(track, "id")
-        guard !trackId.isEmpty else { return nil }
+        guard !trackId.isEmpty else { return idle(state: state) }
 
         // The unit trap, in one place: duration is milliseconds, position is
         // fractional seconds, on the same object.
@@ -37,8 +41,7 @@ final class SpotifySource: ScriptingSource {
             album: string(track, "album"),
             duration: duration,
             position: position,
-            state: MediaUnits.playbackState(
-                fromFourCharCode: fourCharCode(app, "playerState")),
+            state: state,
             artworkPath: artwork
         )
     }

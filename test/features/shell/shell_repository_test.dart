@@ -13,6 +13,7 @@ class _FakeShellDataSource implements ShellDataSource {
   final Stream<Map<String, Object?>> hoverEvents;
   final List<Rect> reported = [];
   int haptics = 0;
+  int quits = 0;
 
   @override
   Stream<Map<String, Object?>> watchGeometryEvents() => events;
@@ -23,6 +24,12 @@ class _FakeShellDataSource implements ShellDataSource {
   @override
   Future<ApiResponse<bool>> performHaptic() async {
     haptics++;
+    return ApiResponse.success(message: 'OK', data: true);
+  }
+
+  @override
+  Future<ApiResponse<bool>> quit() async {
+    quits++;
     return ApiResponse.success(message: 'OK', data: true);
   }
 

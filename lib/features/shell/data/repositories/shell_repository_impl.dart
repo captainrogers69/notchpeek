@@ -26,4 +26,7 @@ class ShellRepositoryImpl implements ShellRepository {
 
   @override
   Future<ApiResponse<bool>> performHaptic() => _source.performHaptic();
+
+  @override
+  Future<ApiResponse<bool>> quit() => _source.quit();
 }

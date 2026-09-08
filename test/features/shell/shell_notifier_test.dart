@@ -33,6 +33,10 @@ class _FakeShellRepository implements ShellRepository {
     haptics++;
     return ApiResponse.success(message: 'OK', data: true);
   }
+
+  @override
+  Future<ApiResponse<bool>> quit() async =>
+      ApiResponse.success(message: 'OK', data: true);
 }
 
 /// A channel event reaches the machine through a `StreamProvider`, which is

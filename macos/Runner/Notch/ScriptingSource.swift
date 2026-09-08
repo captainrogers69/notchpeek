@@ -43,6 +43,32 @@ class ScriptingSource: MusicSource {
     /// Overridden per player.
     func read(from app: SBApplication) -> NowPlayingPayload? { nil }
 
+    /// A player that is running and answering, with nothing loaded. Distinct
+    /// from `nil`, which means we could not read it at all — reporting idle as
+    /// unavailable is the misdiagnosis spec §7 exists to prevent.
+    func idle(state: String) -> NowPlayingPayload {
+        NowPlayingPayload(
+            sourceId: sourceId,
+            trackId: "",
+            title: "",
+            artist: "",
+            album: "",
+            duration: 0,
+            position: 0,
+            state: state,
+            artworkPath: nil
+        )
+    }
+
+    /// `playerState` doubles as the access probe: a player we are not allowed
+    /// to automate answers nothing at all, so an unreadable state means
+    /// unavailable rather than idle.
+    func playerState(of app: SBApplication) -> String? {
+        let state = MediaUnits.playbackState(
+            fromFourCharCode: fourCharCode(app, "playerState"))
+        return state == "unknown" ? nil : state
+    }
+
     func send(command: String, seekTo: TimeInterval?) {
         guard let app else { return }
         switch command {

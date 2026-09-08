@@ -8,6 +8,7 @@ import 'package:notchpeek/features/shell/domain/entities/notch_geometry.dart';
 import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/notch_shape.dart';
 import 'package:notchpeek/shared/utils/enums/notch_state.dart';
+import 'package:notchpeek/shared/widgets/notch_close_button.dart';
 
 /// The container, not a panel. It owns notch state, the clipper, the morph and
 /// the interactive-rect reporting. Panels render inside it and know nothing
@@ -85,15 +86,33 @@ class NotchShell extends HookConsumerWidget {
                 clipper: NotchShape(bottomRadius: radius),
                 child: ColoredBox(
                   color: NotchColors.panel,
-                  child: AnimatedSwitcher(
-                    duration: NotchMotion.contentFade,
-                    switchInCurve: NotchMotion.contentStagger,
-                    child: shell.showsContent
-                        ? KeyedSubtree(
-                            key: const ValueKey('content'),
-                            child: child,
-                          )
-                        : const SizedBox.shrink(key: ValueKey('empty')),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: AnimatedSwitcher(
+                          duration: NotchMotion.contentFade,
+                          switchInCurve: NotchMotion.contentStagger,
+                          child: shell.showsContent
+                              ? KeyedSubtree(
+                                  key: const ValueKey('content'),
+                                  child: child,
+                                )
+                              : const SizedBox.shrink(key: ValueKey('empty')),
+                        ),
+                      ),
+                      // Owned by the shell, not by any panel: a panel that
+                      // renders nothing — or throws — must not be able to take
+                      // the only way out with it. Inset past the concave
+                      // shoulder, which cuts in to `x = w - 12` at this height.
+                      if (shell.showsContent)
+                        Positioned(
+                          top: 6,
+                          right: 20,
+                          child: NotchCloseButton(
+                            onPressed: () => ref.read(quitAppProvider)(),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),

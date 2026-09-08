@@ -23,9 +23,27 @@ enum CapabilityProbe {
             "systemWideMediaRead": false,
             // Writes do land, but M1 commands through scripting (spec §2, §9).
             "systemWideMediaCommand": buildFlavor == "direct",
+            // Permission state alone cannot drive the panel: macOS raises no
+            // prompt for a player that is not running
+            // (`AEDeterminePermissionToAutomateTarget` answers `procNotFound`),
+            // so the panel has to be able to say "start a player first".
+            "playersRunning": installedPlayers.contains(where: isRunning),
             "calendar": calendarState,
             "camera": cameraState,
         ]
+    }
+
+    /// Only the players this Mac actually has. Never launches anything.
+    static var installedPlayers: [String] {
+        [BundleId.appleMusic, BundleId.spotify].filter {
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil
+        }
+    }
+
+    static func isRunning(_ bundleId: String) -> Bool {
+        !NSRunningApplication
+            .runningApplications(withBundleIdentifier: bundleId)
+            .isEmpty
     }
 
     /// The two players M1 knows about. String literals for these belong here
@@ -68,7 +86,9 @@ enum CapabilityProbe {
         }
     }
 
-    /// Prompts. Called only from the panel's "Open Settings" affordance.
+    /// Prompts, and **blocks until the user answers** — never call it on the
+    /// main thread or the panel freezes behind the sheet. macOS raises nothing
+    /// for a player that is not running.
     static func requestAppleEvents(for bundleId: String) {
         var target = AEAddressDesc()
         let bytes = Array(bundleId.utf8)

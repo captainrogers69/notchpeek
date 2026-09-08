@@ -129,6 +129,28 @@ final class MediaBridgeTests: XCTestCase {
             emitted[1]["isTick"] as? Bool, true, "the same track again is a tick")
     }
 
+    /// A running player with nothing loaded is **idle**, and the panel should
+    /// say "Nothing playing". Reporting it as unavailable is the exact
+    /// misdiagnosis spec §7 exists to prevent — and it is what `SpotifySource`
+    /// did by returning nil for an empty track id.
+    func testAnIdleSourceIsAvailableRatherThanUnavailable() {
+        let spotify = StubSource(sourceId: "spotify", isRunning: true, state: "stopped")
+        spotify.payload = NowPlayingPayload(
+            sourceId: "spotify", trackId: "", title: "", artist: "", album: "",
+            duration: 0, position: 0, state: "stopped", artworkPath: nil
+        )
+        let bridge = MediaBridge(sources: [spotify])
+
+        var emitted: [[String: Any]] = []
+        bridge.onUpdate = { emitted.append($0) }
+
+        bridge.refresh()
+
+        XCTAssertEqual(emitted.count, 1)
+        XCTAssertEqual(emitted[0]["available"] as? Bool, true)
+        XCTAssertEqual(emitted[0]["trackId"] as? String, "")
+    }
+
     func testEmitsAnUnavailablePayloadWhenNoSourceCanBeRead() {
         let bridge = MediaBridge(sources: [
             StubSource(sourceId: "spotify", isRunning: false, state: nil)

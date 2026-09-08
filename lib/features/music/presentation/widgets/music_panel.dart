@@ -22,29 +22,60 @@ class MusicPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final capability = ref.watch(
-      capabilitiesProvider.select(
-        (c) => c.value?.music ?? CapabilityState.notDetermined,
-      ),
-    );
+    final caps = ref.watch(capabilitiesProvider).value;
+    final capability = caps?.music ?? CapabilityState.notDetermined;
 
     return switch (capability) {
       // Hidden, never teased: neither player is installed.
       CapabilityState.absent => const SizedBox.shrink(),
-      CapabilityState.denied || CapabilityState.notDetermined => PanelScaffold(
+
+      // Never been asked. "Open Settings" is the wrong affordance here —
+      // there is no row in that pane until the app has actually tried to
+      // control a player, which is what the request does. And macOS raises no
+      // prompt at all for a player that is not running, so say so rather than
+      // offering a button that cannot work.
+      CapabilityState.notDetermined => PanelScaffold(
+        child: (caps?.playersRunning ?? false)
+            ? PermissionPrompt(
+                explanation:
+                    'NotchPeek needs permission to read what Apple Music '
+                    'and Spotify are playing.',
+                actionLabel: 'Grant Access',
+                onPressed: () => _request(ref, PermissionTarget.players),
+              )
+            // No prompt is possible yet, so the button goes to the pane
+            // instead of pretending to ask. NotchPeek has no row there until
+            // its first request, but the way out should never be a dead end.
+            : PermissionPrompt(
+                explanation:
+                    'Open Apple Music or Spotify to grant access, or change '
+                    'it in System Settings.',
+                actionLabel: 'Open Settings',
+                onPressed: () => _request(ref, PermissionTarget.settings),
+              ),
+      ),
+
+      // Refused. Only System Settings can undo this — macOS offers no API to
+      // un-deny, and asking again silently does nothing.
+      CapabilityState.denied => PanelScaffold(
         child: PermissionPrompt(
           explanation:
-              'NotchPeek needs permission to read what Apple Music and '
-              'Spotify are playing.',
+              'NotchPeek was refused permission to read what Apple Music '
+              'and Spotify are playing.',
           actionLabel: 'Open Settings',
-          onPressed: () => ref.read(channelServiceProvider).invoke<bool>(
-            ControlMethod.requestPermission,
-            const {'what': 'automation'},
-          ),
+          onPressed: () => _request(ref, PermissionTarget.settings),
         ),
       ),
+
       CapabilityState.granted => const _MusicReady(),
     };
+  }
+
+  void _request(WidgetRef ref, String what) {
+    ref.read(channelServiceProvider).invoke<bool>(
+      ControlMethod.requestPermission,
+      {'what': what},
+    );
   }
 }
 

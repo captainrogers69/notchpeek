@@ -45,6 +45,7 @@ final class ChannelBridge: NSObject {
     var onGetCapabilities: (() -> [String: Any])?
     var onHaptic: (() -> Void)?
     var onSetMediaPolling: ((Bool) -> Void)?
+    var onQuit: (() -> Void)?
     /// Called when Dart attaches to or detaches from the media stream, so
     /// polling can stop the moment nobody is listening.
     var onMediaListenChanged: ((Bool) -> Void)?
@@ -115,6 +116,10 @@ final class ChannelBridge: NSObject {
             let what = (call.arguments as? [String: Any])?["what"] as? String ?? ""
             onRequestPermission?(what)
             result(true)
+
+        case ControlMethod.quit:
+            result(true)
+            onQuit?()
 
         case ControlMethod.setMediaPolling:
             let enabled =

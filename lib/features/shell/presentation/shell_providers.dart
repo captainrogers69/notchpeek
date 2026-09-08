@@ -7,6 +7,7 @@ import 'package:notchpeek/features/shell/domain/entities/notch_geometry.dart';
 import 'package:notchpeek/features/shell/domain/entities/shell_state.dart';
 import 'package:notchpeek/features/shell/domain/repositories/shell_repository.dart';
 import 'package:notchpeek/features/shell/domain/usecases/perform_haptic.dart';
+import 'package:notchpeek/features/shell/domain/usecases/quit_app.dart';
 import 'package:notchpeek/features/shell/domain/usecases/report_interactive_rect.dart';
 import 'package:notchpeek/features/shell/domain/usecases/watch_geometry.dart';
 import 'package:notchpeek/features/shell/domain/usecases/watch_hover.dart';
@@ -42,6 +43,10 @@ final reportInteractiveRectProvider = Provider<ReportInteractiveRect>(
 
 final performHapticProvider = Provider<PerformHaptic>(
   (ref) => PerformHaptic(ref.watch(shellRepositoryProvider)),
+);
+
+final quitAppProvider = Provider<QuitApp>(
+  (ref) => QuitApp(ref.watch(shellRepositoryProvider)),
 );
 
 /// The Swift side is already stream-shaped, so a `StreamProvider` per
