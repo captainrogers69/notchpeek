@@ -21,13 +21,21 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1FA75535ABA7601A92DD25FE /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39100543B7920179BA76C1F /* NotchWindowController.swift */; };
+		2BA1686F21F8672D0871DA82 /* ReplayBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */; };
+		2EB4D115E6A32EB48E6E4F0E /* ChannelBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
+		68507A69AC16FEC8E2B0401F /* Channels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477207B8EB420E3797729FF0 /* Channels.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		A0E799D95C74AC456A8892BB /* MouseGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */; };
+		A5F74F134CCC1308546D7FE4 /* NotchGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C336DF128690150EA8148009 /* NotchGeometryTests.swift */; };
+		B51C7F594BF1A9F972EFAB73 /* MouseGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98635FE554959524A5BD57A4 /* MouseGateTests.swift */; };
+		E41F052EF71C4E779399B36C /* NotchGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFABD67D3289711677A58FA2 /* NotchGeometry.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,7 +73,7 @@
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
-		33CC10ED2044A3C60003C045 /* notchpeek.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "notchpeek.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		33CC10ED2044A3C60003C045 /* notchpeek.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = notchpeek.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -77,9 +85,17 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
+		477207B8EB420E3797729FF0 /* Channels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Channels.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MouseGate.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		98635FE554959524A5BD57A4 /* MouseGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MouseGateTests.swift; sourceTree = "<group>"; };
+		AFABD67D3289711677A58FA2 /* NotchGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
+		C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayBufferTests.swift; sourceTree = "<group>"; };
+		C336DF128690150EA8148009 /* NotchGeometryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometryTests.swift; sourceTree = "<group>"; };
+		D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChannelBridge.swift; sourceTree = "<group>"; };
+		E39100543B7920179BA76C1F /* NotchWindowController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +121,9 @@
 			isa = PBXGroup;
 			children = (
 				331C80D7294CF71000263BE5 /* RunnerTests.swift */,
+				C336DF128690150EA8148009 /* NotchGeometryTests.swift */,
+				98635FE554959524A5BD57A4 /* MouseGateTests.swift */,
+				C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -172,6 +191,7 @@
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
+				FD9F998073D58C346767EAA4 /* Notch */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -181,6 +201,19 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FD9F998073D58C346767EAA4 /* Notch */ = {
+			isa = PBXGroup;
+			children = (
+				477207B8EB420E3797729FF0 /* Channels.swift */,
+				AFABD67D3289711677A58FA2 /* NotchGeometry.swift */,
+				D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */,
+				E39100543B7920179BA76C1F /* NotchWindowController.swift */,
+				88315CAFB2FE9AF5FAD348C7 /* MouseGate.swift */,
+			);
+			name = Notch;
+			path = Notch;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,7 +301,7 @@
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
@@ -347,6 +380,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */,
+				A5F74F134CCC1308546D7FE4 /* NotchGeometryTests.swift in Sources */,
+				B51C7F594BF1A9F972EFAB73 /* MouseGateTests.swift in Sources */,
+				2BA1686F21F8672D0871DA82 /* ReplayBufferTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,6 +393,11 @@
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+				68507A69AC16FEC8E2B0401F /* Channels.swift in Sources */,
+				E41F052EF71C4E779399B36C /* NotchGeometry.swift in Sources */,
+				2EB4D115E6A32EB48E6E4F0E /* ChannelBridge.swift in Sources */,
+				1FA75535ABA7601A92DD25FE /* NotchWindowController.swift in Sources */,
+				A0E799D95C74AC456A8892BB /* MouseGate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +439,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.capcraft.notchpeek.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/notchpeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/notchpeek";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NotchPeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NotchPeek";
 			};
 			name = Debug;
 		};
@@ -412,7 +453,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.capcraft.notchpeek.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/notchpeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/notchpeek";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NotchPeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NotchPeek";
 			};
 			name = Release;
 		};
@@ -426,7 +467,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.capcraft.notchpeek.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/notchpeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/notchpeek";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NotchPeek.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NotchPeek";
 			};
 			name = Profile;
 		};
@@ -712,7 +753,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};

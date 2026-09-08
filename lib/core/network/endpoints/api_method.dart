@@ -12,9 +12,7 @@ enum ApiMethod {
   static ApiMethod fromValue(String method) {
     return ApiMethod.values.firstWhere(
       (e) => e.value.toUpperCase() == method.toUpperCase(),
-      orElse: () => throw ArgumentError(
-        'Invalid ApiMethod value: $method',
-      ),
+      orElse: () => throw ArgumentError('Invalid ApiMethod value: $method'),
     );
   }
 }

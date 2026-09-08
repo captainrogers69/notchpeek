@@ -1,110 +1,44 @@
-import 'dart:convert';
-
-// import 'dart:developer';
-
 import 'package:dio/dio.dart';
-import 'package:notchpeek/utils/helpers/app_logger.dart';
+import 'package:notchpeek/core/logging/notch_logger.dart';
 
-class _ApiConfiguration {
-  // static const Duration timeout = Duration(seconds: 60);
-  static const logRequest = true;
-  static const logRequestHeader = false;
-  static const logRequestBody = false;
-  static const logResponseHeader = false;
-  static const logResponseBody = true;
-  // static const logGetPresignedUrlRequest = false;
-  // static const logGetPresignedUrlResponse = true;
-  static const logError = true;
-}
-
-/* final apiLogInterceptorProvider = Provider<_ApiLogInterceptor>((ref) {
-  return _ApiLogInterceptor();
-}); */
-
+/// Debug-only request logging for the one endpoint this app has.
+///
+/// Deliberately logs **shapes, not values**: the artwork search term is the
+/// user's track and album, and the response body is somebody's listening
+/// history. Playbook §6 says log ids, counts and states — so that is what
+/// crosses, even though the endpoint itself is public.
 class ApiLogInterceptor extends Interceptor {
-  final NotchLogger logger;
   ApiLogInterceptor() : logger = NotchLogger.forTag('ApiLogInterceptor');
 
-  String _cURLRepresentation(RequestOptions options) {
-    final components = <String>["curl -i"];
-
-    components.add("-X ${options.method}");
-
-    options.headers.forEach((k, v) {
-      if (k.toLowerCase() != "cookie" &&
-          k.toLowerCase() != 'x-api-key' &&
-          k.toLowerCase() != 'x-device-id' &&
-          k.toLowerCase() != 'x-fingerprint' &&
-          k.toLowerCase() != 'authorization') {
-        components.add('-H "$k: $v"');
-      }
-    });
-
-    if (options.data != null) {
-      if (options.data is FormData) {
-        final formData = options.data as FormData;
-        final fields = formData.fields
-            .map((e) => '"${e.key}": "${e.value}"')
-            .join(',');
-        components.add('-d "{$fields}"');
-      } else {
-        final jsonData = json.encode(options.data);
-        components.add("-d '$jsonData'");
-      }
-    }
-
-    components.add('"${options.uri}"');
-
-    return components.join(' \\\n\t');
-  }
+  final NotchLogger logger;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (_ApiConfiguration.logRequest) {
-      if (!options.data.toString().contains('Get_Presigned_Url')) {
-        logger.debug(_cURLRepresentation(options));
-      } /*  else {
-        logger.debug("Skipped Get_Presigned_Url");
-      } */
-
-      if (_ApiConfiguration.logRequestHeader) {
-        // !TO be kept hidden
-        logger.debug("Headers: ${options.headers}");
-      }
-
-      if (_ApiConfiguration.logRequestBody && options.data != null) {
-        logger.debug("Body: ${options.data}");
-      }
-    }
-
+    final keys = options.queryParameters.keys.join(', ');
+    logger.debug(
+      '${options.method} ${options.path}${keys.isEmpty ? '' : ' ?$keys'}',
+    );
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (_ApiConfiguration.logResponseHeader) {
-      logger.debug("Response Headers: ${response.headers}");
-    }
-
-    if (_ApiConfiguration.logResponseBody) {
-      //  if (!response.data.toString().contains('Get_Presigned_Url')) {
-      logger.success("Response{${response.statusCode}}:: ${response.data}");
-      // } else {
-      //   logger.debug("Skipped Get_Presigned_Url Response");
-      // }
-    }
-
+    final data = response.data;
+    final count = data is Map ? data['resultCount'] : null;
+    logger.success(
+      '${response.statusCode} ${response.requestOptions.path}'
+      '${count == null ? '' : ' ($count results)'}',
+    );
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (_ApiConfiguration.logError) {
-      logger.error(
-        "Error{${err.response?.statusCode}}: URI: ${err.requestOptions.uri.toString().trim()}\n Type: ${err.type.toString().trim()}\n Message: ${err.message.toString().trim()}\n error data:${err.response?.data.toString().trim()}",
-      );
-    }
-
+    logger.error(
+      '${err.response?.statusCode ?? '-'} ${err.requestOptions.path} '
+      '(${err.type.name})',
+      error: err.message,
+    );
     handler.next(err);
   }
 }

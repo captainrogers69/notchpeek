@@ -52,10 +52,7 @@ class ApiErrorHandler {
 
     switch (statusCode) {
       case 401:
-        return ApiResponse.error(
-          message: 'Session expired. Please login again.',
-          statusCode: 401,
-        );
+        return ApiResponse.error(message: 'Not authorized.', statusCode: 401);
       case 403:
         return ApiResponse.error(
           message: "You don't have permission to perform this action.",
@@ -125,10 +122,7 @@ class ApiErrorHandler {
     switch (code) {
       case 'UNAUTHENTICATED':
       case 'UNAUTHORIZED':
-        return ApiResponse.error(
-          message: 'Session expired. Please login again.',
-          statusCode: 401,
-        );
+        return ApiResponse.error(message: 'Not authorized.', statusCode: 401);
       case 'FORBIDDEN':
         return ApiResponse.error(
           message: "You don't have permission to perform this action.",
@@ -218,10 +212,7 @@ class ApiErrorHandler {
         lower.contains('unauthenticated') ||
         lower.contains('invalid token') ||
         lower.contains('token expired')) {
-      return ApiResponse.error(
-        message: 'Session expired. Please login again.',
-        statusCode: 401,
-      );
+      return ApiResponse.error(message: 'Not authorized.', statusCode: 401);
     }
     if (lower.contains('not found')) {
       return ApiResponse.error(message: 'Resource not found.', statusCode: 404);

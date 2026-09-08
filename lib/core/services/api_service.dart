@@ -3,183 +3,67 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:notchpeek/core/network/endpoints/api_method.dart';
+import 'package:notchpeek/core/network/endpoints/api_endpoints.dart';
 import 'package:notchpeek/core/network/errors/api_error.dart';
-import 'package:notchpeek/core/network/errors/api_response.dart'
-    show ApiResponse;
-import 'package:notchpeek/core/network/interceptor/dio_interceptor.dart';
+import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/core/network/interceptor/log_interceptor.dart';
 
-/// REST client for this backend, per docs/playbook/architecture-playbook.md
-/// §3. Every endpoint responds with the same envelope:
-/// `{"success": bool, "data": ..., "message": "..."}` — no GraphQL.
+/// The only place a `Dio` instance exists (architecture-playbook §5).
+///
+/// This is not the app's spine. NotchPeek's data comes from the OS through
+/// platform channels; HTTP is here for artwork lookup and nothing else. There
+/// is no auth interceptor because there are no accounts.
 final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(
-    baseUrl: "",
-    interceptor: ApiInterceptor(ref),
+    baseUrl: ApiEndpoint.itunesBaseUrl,
     logInterceptor: kDebugMode ? ApiLogInterceptor() : null,
   );
 });
 
 class ApiService {
-  late final Dio _dio;
-
-  ApiService({
-    required String baseUrl,
-    required ApiInterceptor interceptor,
-    ApiLogInterceptor? logInterceptor,
-  }) {
+  ApiService({required String baseUrl, Interceptor? logInterceptor}) {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 20),
-        receiveTimeout: const Duration(minutes: 2),
-        sendTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
         responseType: ResponseType.json,
-        headers: const {
-          HttpHeaders.acceptHeader: 'application/json',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
+        headers: const {HttpHeaders.acceptHeader: 'application/json'},
       ),
     );
-
-    _dio.interceptors.add(interceptor);
-    if (kDebugMode && logInterceptor != null) {
-      _dio.interceptors.add(logInterceptor);
-    }
+    if (logInterceptor != null) _dio.interceptors.add(logInterceptor);
   }
 
-  Future<ApiResponse<dynamic>> get(
+  late final Dio _dio;
+
+  /// Test seam. Production code never assigns this.
+  @visibleForTesting
+  set debugAdapter(HttpClientAdapter adapter) =>
+      _dio.httpClientAdapter = adapter;
+
+  /// The only verb this app needs. Add another when a second endpoint exists,
+  /// not before.
+  Future<ApiResponse<Map<String, dynamic>>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) {
-    return _send(
-      ApiMethod.getr,
-      path,
-      queryParameters: queryParameters,
-      headers: headers,
-    );
-  }
-
-  Future<ApiResponse<dynamic>> post(
-    String path, {
-    Map<String, dynamic>? data,
-    Map<String, dynamic>? headers,
-  }) {
-    return _send(ApiMethod.post, path, data: data, headers: headers);
-  }
-
-  Future<ApiResponse<dynamic>> put(
-    String path, {
-    Map<String, dynamic>? data,
-    Map<String, dynamic>? headers,
-  }) {
-    return _send(ApiMethod.put, path, data: data, headers: headers);
-  }
-
-  Future<ApiResponse<dynamic>> delete(
-    String path, {
-    Map<String, dynamic>? data,
-    Map<String, dynamic>? headers,
-  }) {
-    return _send(ApiMethod.delete, path, data: data, headers: headers);
-  }
-
-  /// Multipart upload — single file plus optional extra form fields (e.g.
-  /// the `folder` field the media upload endpoints expect).
-  Future<ApiResponse<dynamic>> multipart(
-    String path, {
-    required String fieldName,
-    required String filePath,
-    Map<String, String>? fields,
-    Map<String, dynamic>? headers,
-  }) async {
-    final formData = FormData.fromMap({
-      ...?fields,
-      fieldName: await MultipartFile.fromFile(filePath),
-    });
-    return _send(ApiMethod.post, path, data: formData, headers: headers);
-  }
-
-  Future<ApiResponse<dynamic>> _send(
-    ApiMethod method,
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
   }) async {
     try {
-      final response = await _dio.request<Map<String, dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         path,
-        data: data,
         queryParameters: queryParameters,
-        options: Options(method: method.value, headers: headers),
       );
-      return _unwrap(response);
+      final body = response.data;
+      if (body == null) {
+        return ApiResponse.error(
+          message: 'Empty response.',
+          statusCode: response.statusCode,
+        );
+      }
+      return ApiResponse.success(message: 'OK', data: body);
     } on DioException catch (e) {
-      return ApiErrorHandler.handleDioError(e);
+      return ApiErrorHandler.handleDioError<Map<String, dynamic>>(e);
     } catch (e) {
-      return ApiErrorHandler.handleGenericError(e);
+      return ApiErrorHandler.handleGenericError<Map<String, dynamic>>(e);
     }
-  }
-
-  /// For endpoints that don't follow this backend's standard `{success,
-  /// data, message}` envelope — e.g. the legacy `api/auth/*` endpoints,
-  /// which return the payload directly at the top level and signal
-  /// success via HTTP status only, not a `success` field. Callers own
-  /// their own status/parsing logic.
-  Future<Response<Map<String, dynamic>>> postRaw(
-    String path, {
-    Map<String, dynamic>? data,
-    Map<String, dynamic>? headers,
-  }) {
-    return _dio.post<Map<String, dynamic>>(
-      path,
-      data: data,
-      options: Options(headers: headers),
-    );
-  }
-
-  /// GET counterpart to [postRaw] — for endpoints whose envelope doesn't
-  /// match `{success, data, message}` (e.g. `api/profile/myProfile`, which
-  /// uses `status` instead of `success` — see
-  /// docs/superpowers/specs/2026-08-14-profile-completion-design.md).
-  /// Callers own their own status/parsing logic.
-  Future<Response<Map<String, dynamic>>> getRaw(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) {
-    return _dio.get<Map<String, dynamic>>(
-      path,
-      queryParameters: queryParameters,
-      options: Options(headers: headers),
-    );
-  }
-
-  /// Unwraps this backend's REST envelope: `{success, data, message}`.
-  ApiResponse<dynamic> _unwrap(Response<Map<String, dynamic>> response) {
-    final body = response.data;
-    if (body == null) {
-      return ApiResponse.error(
-        message: 'Empty response from server.',
-        statusCode: response.statusCode,
-      );
-    }
-
-    final success = body['success'] == true;
-    final message =
-        body['message']?.toString() ??
-        (success ? 'Success' : 'Something went wrong');
-
-    if (!success) {
-      return ApiResponse.error(
-        message: message,
-        statusCode: response.statusCode,
-      );
-    }
-
-    return ApiResponse.success(message: message, data: body['data']);
   }
 }
