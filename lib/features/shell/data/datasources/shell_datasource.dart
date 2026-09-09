@@ -8,6 +8,7 @@ import 'package:notchpeek/core/platform/channels.dart';
 abstract class ShellDataSource {
   Stream<Map<String, Object?>> watchGeometryEvents();
   Stream<Map<String, Object?>> watchHoverEvents();
+  Stream<Map<String, Object?>> watchPowerEvents();
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect);
   Future<ApiResponse<bool>> performHaptic();
   Future<ApiResponse<bool>> quit();
@@ -30,6 +31,10 @@ class ShellDataSourceImpl implements ShellDataSource {
     Stream<Map<String, Object?>> events,
   ) => events.where((e) => e[SystemEventKind.key] == SystemEventKind.hover);
 
+  static Stream<Map<String, Object?>> filterPower(
+    Stream<Map<String, Object?>> events,
+  ) => events.where((e) => e[SystemEventKind.key] == SystemEventKind.power);
+
   @override
   Stream<Map<String, Object?>> watchGeometryEvents() {
     _log.debug('subscribing to geometry events');
@@ -40,6 +45,12 @@ class ShellDataSourceImpl implements ShellDataSource {
   Stream<Map<String, Object?>> watchHoverEvents() {
     _log.debug('subscribing to hover events');
     return filterHover(_channels.systemEvents);
+  }
+
+  @override
+  Stream<Map<String, Object?>> watchPowerEvents() {
+    _log.debug('subscribing to power events');
+    return filterPower(_channels.systemEvents);
   }
 
   @override

@@ -12,6 +12,7 @@ class AppDelegate: FlutterAppDelegate {
     var geometryObserver: NotchGeometryObserver?
     var mouseGate: MouseGate?
     var mediaBridge: MediaBridge?
+    var powerBridge: PowerBridge?
 
     private var started = false
 
@@ -191,6 +192,12 @@ class AppDelegate: FlutterAppDelegate {
         bridge.onSetMediaPolling = { [weak media] enabled in
             media?.setPolling(enabled)
         }
+
+        let power = PowerBridge { [weak bridge] payload in
+            bridge?.sendSystem(SystemEvent.power, payload)
+        }
+        power.start()
+        powerBridge = power
 
         let observer = NotchGeometryObserver { [weak self, weak bridge] metrics in
             // Reposition before telling Dart: the window must already be in the

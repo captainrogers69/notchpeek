@@ -1,9 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:notchpeek/app/theme.dart';
+import 'package:notchpeek/features/music/presentation/music_providers.dart';
+import 'package:notchpeek/features/shell/presentation/peek_listener.dart';
 import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/notch_shell.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/panel_host.dart';
+import 'package:notchpeek/shared/utils/enums/notch_state.dart';
+import 'package:notchpeek/features/shell/presentation/widgets/music_strip.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/peek_content.dart';
 
 /// The root widget. There is no routing package and no navigator: one window,
@@ -37,14 +41,23 @@ class NotchSurface extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final geometry = ref.watch(geometryProvider);
+    final hasTrack = ref.watch(
+      nowPlayingProvider.select((t) => t.value?.hasTrack ?? false),
+    );
 
-    return switch (geometry) {
-      AsyncData(:final value) => NotchShell(
-        geometry: value,
-        child: const _ShellContent(),
-      ),
-      _ => const SizedBox.shrink(),
-    };
+    // Outside the switch, not inside it: peeks have to be listened for before
+    // geometry resolves and while the notch is collapsed, and this is the only
+    // thing keeping the media channel subscribed.
+    return PeekListener(
+      child: switch (geometry) {
+        AsyncData(:final value) => NotchShell(
+          geometry: value,
+          showsStrip: hasTrack,
+          child: const _ShellContent(),
+        ),
+        _ => const SizedBox.shrink(),
+      },
+    );
   }
 }
 
@@ -55,9 +68,12 @@ class _ShellContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expanded = ref.watch(
-      shellNotifierProvider.select((s) => s.isExpanded),
-    );
-    return expanded ? const PanelHost() : const PeekContent();
+    final state = ref.watch(shellNotifierProvider.select((s) => s.state));
+    return switch (state) {
+      NotchState.expanded => const PanelHost(),
+      NotchState.peeking => const PeekContent(),
+      // Resting, with something loaded: artwork and a level meter.
+      NotchState.collapsed => const MusicStrip(),
+    };
   }
 }

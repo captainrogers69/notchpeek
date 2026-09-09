@@ -70,7 +70,7 @@ class PanelHost extends HookConsumerWidget {
         // row sits flush against the shell's rounded corner and gets clipped
         // — which is what happened to the source badge that used to be here.
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.only(left: 16, right: 22),
           child: StatusRow(),
         ),
       ],

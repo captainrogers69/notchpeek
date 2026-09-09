@@ -59,6 +59,12 @@ class NotchGeometry extends Equatable {
     return Rect.fromLTWH(left, 0, size.width, size.height);
   }
 
+  /// The collapsed silhouette when the music strip is showing: as tall as the
+  /// hot zone, wide enough for artwork and a level meter to clear the notch.
+  Rect stripRect() => centeredRect(
+    Size(NotchSizes.stripWidth, notchHeight + NotchSizes.hotZoneInset),
+  );
+
   /// The rect Swift should let the mouse through to, for each shell state
   /// (spec §3.2).
   Rect interactiveRect(NotchState state) => switch (state) {

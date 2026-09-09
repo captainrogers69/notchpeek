@@ -4,7 +4,9 @@ import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/features/shell/data/datasources/shell_datasource.dart';
 import 'package:notchpeek/features/shell/data/models/hover_model.dart';
 import 'package:notchpeek/features/shell/data/models/notch_geometry_model.dart';
+import 'package:notchpeek/features/shell/data/models/power_state_model.dart';
 import 'package:notchpeek/features/shell/domain/entities/notch_geometry.dart';
+import 'package:notchpeek/features/shell/domain/entities/power_state.dart';
 import 'package:notchpeek/features/shell/domain/repositories/shell_repository.dart';
 
 class ShellRepositoryImpl implements ShellRepository {
@@ -19,6 +21,10 @@ class ShellRepositoryImpl implements ShellRepository {
   @override
   Stream<bool> watchHover() =>
       _source.watchHoverEvents().map(HoverModel.toEntity);
+
+  @override
+  Stream<PowerState> watchPower() =>
+      _source.watchPowerEvents().map(PowerStateModel.toEntity);
 
   @override
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect) =>

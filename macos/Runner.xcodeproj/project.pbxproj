@@ -23,6 +23,7 @@
 /* Begin PBXBuildFile section */
 		1FA75535ABA7601A92DD25FE /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39100543B7920179BA76C1F /* NotchWindowController.swift */; };
 		2BA1686F21F8672D0871DA82 /* ReplayBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */; };
+		2DF622CA14AE66C9D861F1AB /* PowerBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF133E237DA83F9BD33204C /* PowerBridge.swift */; };
 		2EB4D115E6A32EB48E6E4F0E /* ChannelBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D799CA2CB46EA9BD7469C07C /* ChannelBridge.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
@@ -108,6 +109,7 @@
 		98635FE554959524A5BD57A4 /* MouseGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MouseGateTests.swift; sourceTree = "<group>"; };
 		AFABD67D3289711677A58FA2 /* NotchGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometry.swift; sourceTree = "<group>"; };
 		B74E5E1FF877D29B739BE638 /* MusicSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MusicSource.swift; sourceTree = "<group>"; };
+		BBF133E237DA83F9BD33204C /* PowerBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PowerBridge.swift; sourceTree = "<group>"; };
 		C1DA4444AB628C82042181E9 /* ReplayBufferTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayBufferTests.swift; sourceTree = "<group>"; };
 		C336DF128690150EA8148009 /* NotchGeometryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchGeometryTests.swift; sourceTree = "<group>"; };
 		D1D54B409923CB8FE6504241 /* CapabilityProbe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapabilityProbe.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				596C3C3A8213780AB7395E3F /* AppleMusicSource.swift */,
 				467BFC0434EA56F3EC28B794 /* ArtworkCache.swift */,
 				F499DA3C4F8969C599C46846 /* MediaBridge.swift */,
+				BBF133E237DA83F9BD33204C /* PowerBridge.swift */,
 			);
 			name = Notch;
 			path = Notch;
@@ -434,6 +437,7 @@
 				B0D925EED2C8238BE180353B /* AppleMusicSource.swift in Sources */,
 				78B70BD51A860AD8963FBDBE /* ArtworkCache.swift in Sources */,
 				CFF342D1826A1339B8C97545 /* MediaBridge.swift in Sources */,
+				2DF622CA14AE66C9D861F1AB /* PowerBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

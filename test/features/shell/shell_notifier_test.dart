@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/features/shell/domain/entities/notch_geometry.dart';
+import 'package:notchpeek/features/shell/domain/entities/power_state.dart';
 import 'package:notchpeek/features/shell/domain/entities/shell_state.dart';
 import 'package:notchpeek/features/shell/domain/repositories/shell_repository.dart';
 import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
@@ -23,6 +24,9 @@ class _FakeShellRepository implements ShellRepository {
 
   @override
   Stream<bool> watchHover() => hover.stream;
+
+  @override
+  Stream<PowerState> watchPower() => const Stream.empty();
 
   @override
   Future<ApiResponse<bool>> setInteractiveRect(Rect rect) async =>

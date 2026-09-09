@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:notchpeek/app/theme.dart';
 import 'package:notchpeek/core/network/errors/api_response.dart';
 import 'package:notchpeek/features/shell/domain/entities/notch_geometry.dart';
+import 'package:notchpeek/features/shell/domain/entities/power_state.dart';
 import 'package:notchpeek/features/shell/domain/repositories/shell_repository.dart';
 import 'package:notchpeek/features/shell/presentation/shell_providers.dart';
 import 'package:notchpeek/features/shell/presentation/widgets/notch_shell.dart';
@@ -31,6 +32,9 @@ class _RecordingShellRepository implements ShellRepository {
 
   @override
   Stream<bool> watchHover() => const Stream.empty();
+
+  @override
+  Stream<PowerState> watchPower() => const Stream.empty();
 
   @override
   Future<ApiResponse<bool>> performHaptic() async =>

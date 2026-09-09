@@ -22,6 +22,9 @@ class _FakeShellDataSource implements ShellDataSource {
   Stream<Map<String, Object?>> watchHoverEvents() => hoverEvents;
 
   @override
+  Stream<Map<String, Object?>> watchPowerEvents() => const Stream.empty();
+
+  @override
   Future<ApiResponse<bool>> performHaptic() async {
     haptics++;
     return ApiResponse.success(message: 'OK', data: true);

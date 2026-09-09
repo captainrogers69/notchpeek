@@ -14,16 +14,29 @@ import 'package:notchpeek/shared/widgets/notch_close_button.dart';
 /// the interactive-rect reporting. Panels render inside it and know nothing
 /// about it (architecture-playbook §3).
 class NotchShell extends HookConsumerWidget {
-  const NotchShell({required this.geometry, required this.child, super.key});
+  const NotchShell({
+    required this.geometry,
+    required this.child,
+    this.showsStrip = false,
+    super.key,
+  });
 
   final NotchGeometry geometry;
   final Widget child;
 
+  /// Widens the *collapsed* silhouette to hold the always-on music strip.
+  /// Passed in rather than read here so the shell stays ignorant of the music
+  /// feature — it only knows the resting shape got bigger.
+  final bool showsStrip;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shell = ref.watch(shellNotifierProvider);
-    final target = geometry.interactiveRect(shell.state);
-    final collapsed = geometry.interactiveRect(NotchState.collapsed);
+    final target = _rectFor(shell.state);
+    final collapsed = _rectFor(NotchState.collapsed);
+    // Collapsed is no longer necessarily empty.
+    final showsContent =
+        shell.showsContent || (shell.isCollapsed && showsStrip);
 
     final controller = useAnimationController(duration: NotchMotion.open);
 
@@ -92,7 +105,7 @@ class NotchShell extends HookConsumerWidget {
                         child: AnimatedSwitcher(
                           duration: NotchMotion.contentFade,
                           switchInCurve: NotchMotion.contentStagger,
-                          child: shell.showsContent
+                          child: showsContent
                               ? KeyedSubtree(
                                   key: const ValueKey('content'),
                                   child: child,
@@ -122,4 +135,11 @@ class NotchShell extends HookConsumerWidget {
       ),
     );
   }
+
+  /// The collapsed hot zone grows with the strip, so hovering the artwork
+  /// opens the panel. The stretch of menu bar it covers is the empty gap
+  /// beside the notch, not the app menus or the status items.
+  Rect _rectFor(NotchState state) => state == NotchState.collapsed && showsStrip
+      ? geometry.stripRect()
+      : geometry.interactiveRect(state);
 }

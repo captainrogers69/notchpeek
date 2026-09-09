@@ -55,6 +55,12 @@ abstract final class NotchSizes {
   static const double peekWidth = 260;
   static const double peekHeight = 44;
 
+  /// The always-on music strip: the collapsed silhouette, widened so artwork
+  /// and a level meter sit either side of the notch. Centred, so it only ever
+  /// covers the stretch of menu bar next to the notch — app menus end well to
+  /// the left of it and status items begin well to the right.
+  static const double stripWidth = 320;
+
   /// **Must match `NotchGeometry.virtualNotchWidth` / `Height` in Swift.**
   static const double virtualNotchWidth = 200;
   static const double virtualNotchHeight = 32;
